@@ -1,85 +1,131 @@
 # Flowchart Program Graf
 
-Flowchart ini memakai **konvensi standar flowchart** dan menambahkan alur pertanyaan yang lengkap untuk setiap topik. Salin blok Mermaid berikut ke [Mermaid AI](https://mermaid.ai/).
+Dokumen ini menggambarkan **alur kode `main.cpp` saat ini**. Diagram dipecah menjadi halaman/subproses agar tetap mudah dibaca dan tidak memiliki garis yang saling berpotongan.
 
-> **Catatan:** bagian alur pertanyaan adalah rancangan lengkap yang perlu diimplementasikan saat `showQuestion()` dikembangkan. Kode saat ini hanya menampilkan Soal 1. Tidak ada cabang yang sengaja dibiarkan tanpa tujuan.
+Konvensi yang dipakai mengikuti [Flowchart Drawing Specifications dari ProcessOn](https://www.processon.io/blog/flowchart-drawing-specifications): alur dari atas ke bawah, satu titik mulai pada diagram utama, teks ringkas, proses ber-input/output tunggal, serta setiap keputusan memiliki cabang berlabel.
+
+Salin blok Mermaid ke [Mermaid AI](https://mermaid.ai/) bila ingin merender diagramnya.
+
+## Halaman 1 — Alur utama `main()`
 
 ```mermaid
 flowchart TD
-    Start([Mulai]) --> PrepMain{{Persiapan: systemRunning = true, choice = 0}}
-    PrepMain --> Header[/Output: tampilkan header program/]
-    Header --> MainMenu[/Output: tampilkan Main Menu/]
-    MainMenu --> MainInput[/Input: masukkan pilihan 1 sampai 4/]
+    Start([Mulai]) --> Init{{Persiapan: systemRunning = true; choice = 0}}
+    Init --> MainLoop((Ulangi menu))
+    MainLoop --> Running{systemRunning bernilai true?}
 
-    MainInput --> NumberValid{Input berupa angka?}
-    NumberValid -- Tidak --> NumberError[/Output: "Input harus berupa angka"/]
-    NumberError --> ResetInput[Proses: cin.clear dan cin.ignore]
-    ResetInput --> Header
+    Running -- Tidak --> ExitMessage[/Output: tampilkan pesan terima kasih/]
+    ExitMessage --> End([Selesai])
 
-    NumberValid -- Ya --> IgnoreNewline[Proses: cin.ignore newline]
-    IgnoreNewline --> MainChoice{Nilai pilihan?}
+    Running -- Ya --> Header[/Output: tampilkan header/]
+    Header --> Menu[/Output: tampilkan Main Menu/]
+    Menu --> InputChoice[/Input: masukkan pilihan 1 sampai 4/]
+    InputChoice --> IsNumber{Input berupa angka?}
 
-    MainChoice -- "1. Definisi" --> Definition[[Subprogram: showDefinition]]
-    Definition --> DefinitionOutput[/Output: tampilkan seluruh definisi materi/]
-    DefinitionOutput --> MainPause[/Input: tekan Enter/]
+    IsNumber -- Tidak --> InputError[/Output: "Input harus berupa angka"/]
+    InputError --> ClearInput[Proses: cin.clear dan cin.ignore]
+    ClearInput --> MainLoop
 
-    MainChoice -- "2. Soal" --> QuestionModule[[Subprogram: showQuestion]]
-    QuestionModule --> TopicInit{{Persiapan: topicIndex = 1}}
+    IsNumber -- Ya --> IgnoreNewline[Proses: cin.ignore newline]
+    IgnoreNewline --> Choice{Nilai choice?}
 
-    TopicInit --> TopicLoop{topicIndex ≤ 18?}
-    TopicLoop -- Ya --> ListTopic[/Output: tampilkan topik dan soal terkait topicIndex/]
-    ListTopic --> IncreaseTopic[Proses: topicIndex = topicIndex + 1]
-    IncreaseTopic --> TopicLoop
-    TopicLoop -- Tidak --> TopicMenu[/Output: tampilkan daftar topik 1 sampai 18 dan pilihan 0 untuk kembali/]
+    Choice -- "1: Definisi" --> Definition[[Subproses: showDefinition]]
+    Definition --> PauseMain[/Input: tekan Enter/]
+    PauseMain --> MainLoop
 
-    TopicMenu --> TopicInput[/Input: pilih topik atau 0/]
-    TopicInput --> BackFromTopic{Pilihan topik = 0?}
-    BackFromTopic -- Ya --> Header
-    BackFromTopic -- Tidak --> TopicValid{Topik tersedia 1 sampai 18?}
-    TopicValid -- Tidak --> TopicError[/Output: "Topik tidak tersedia"/]
-    TopicError --> TopicMenu
-    TopicValid -- Ya --> LoadQuestions[Proses: ambil daftar soal untuk topik terpilih]
+    Choice -- "2: Soal" --> Questions[[Subproses: showQuestion; lihat Halaman 2]]
+    Questions --> MainLoop
 
-    LoadQuestions --> QuestionMenu[/Output: tampilkan soal topik dan pilihan 0 untuk kembali/]
-    QuestionMenu --> QuestionInput[/Input: pilih nomor soal atau 0/]
-    QuestionInput --> BackFromQuestion{Pilihan soal = 0?}
-    BackFromQuestion -- Ya --> TopicMenu
-    BackFromQuestion -- Tidak --> QuestionValid{Nomor soal tersedia?}
-    QuestionValid -- Tidak --> QuestionError[/Output: "Soal tidak tersedia"/]
-    QuestionError --> QuestionMenu
+    Choice -- "3: Pecahkan Soal" --> Solver[[Subproses: solveQuestion; lihat Halaman 3]]
+    Solver --> MainLoop
 
-    QuestionValid -- Ya --> LoadQuestion[Proses: ambil teks dan file gambar soal]
-    LoadQuestion --> TextQuestion[/Output: tampilkan teks soal/]
-    TextQuestion --> ImageExists{File gambar soal tersedia?}
+    Choice -- "4: Keluar" --> StopProgram[Proses: systemRunning = false]
+    StopProgram --> MainLoop
 
-    ImageExists -- Tidak --> AskAnotherQuestion{Lihat soal lain dalam topik ini?}
-    ImageExists -- Ya --> RunChafa[Proses: jalankan Chafa untuk gambar soal]
-    RunChafa --> ChafaSuccess{Status Chafa = 0?}
-    ChafaSuccess -- Ya --> ImageShown[/Output: gambar soal tampil di terminal/]
-    ChafaSuccess -- Tidak --> ChafaError[/Output: tampilkan pesan instalasi atau error Chafa/]
-    ImageShown --> AskAnotherQuestion
-    ChafaError --> AskAnotherQuestion
+    Choice -- "Selain 1 sampai 4" --> ChoiceError[/Output: "Pilihan tidak tersedia"/]
+    ChoiceError --> PauseMain
 
-    AskAnotherQuestion -- Ya --> LoadQuestions
-    AskAnotherQuestion -- Tidak --> AskAnotherTopic{Pilih topik lain?}
-    AskAnotherTopic -- Ya --> TopicMenu
-    AskAnotherTopic -- Tidak --> Header
+    classDef terminator fill:#D5F5E3,stroke:#1E8449,color:#000,stroke-width:2px;
+    classDef preparation fill:#E8DAEF,stroke:#7D3C98,color:#000,stroke-width:2px;
+    classDef process fill:#D6EAF8,stroke:#2874A6,color:#000,stroke-width:2px;
+    classDef io fill:#FDEBD0,stroke:#CA6F1E,color:#000,stroke-width:2px;
+    classDef decision fill:#F9E79F,stroke:#B7950B,color:#000,stroke-width:2px;
+    classDef subprocess fill:#D4E6F1,stroke:#2471A3,color:#000,stroke-width:2px;
+    classDef connector fill:#FFFFFF,stroke:#555555,color:#000,stroke-width:2px;
 
-    MainChoice -- "3. Pecahkan Soal" --> SolverModule[[Subprogram: solveQuestion]]
-    SolverModule --> SolverMenu[/Output: tampilkan topik pemecahan soal/]
+    class Start,End terminator;
+    class MainLoop connector;
+    class Init preparation;
+    class ClearInput,IgnoreNewline,StopProgram process;
+    class Header,Menu,InputChoice,InputError,ExitMessage,PauseMain,ChoiceError io;
+    class Running,IsNumber,Choice decision;
+    class Definition,Questions,Solver subprocess;
+```
+
+## Halaman 2 — Subproses `showQuestion()`
+
+```mermaid
+flowchart TD
+    SQEntry((Dipanggil oleh main)) --> ListQuestions[/Output: tampilkan 31 soal dan pilihan 0/]
+    ListQuestions --> InputQuestion[/Input: masukkan nomor soal/]
+    InputQuestion --> QuestionIsNumber{Input berupa angka?}
+
+    QuestionIsNumber -- Tidak --> NumberError[/Output: "Input harus berupa angka"/]
+    NumberError --> ClearQuestionInput[Proses: cin.clear dan cin.ignore]
+    ClearQuestionInput --> ListQuestions
+
+    QuestionIsNumber -- Ya --> IgnoreQuestionNewline[Proses: cin.ignore newline]
+    IgnoreQuestionNewline --> BackToMain{Nomor soal = 0?}
+    BackToMain -- Ya --> SQReturn((Kembali ke main))
+
+    BackToMain -- Tidak --> FindQuestion[Proses: cari nomor soal pada array questions]
+    FindQuestion --> QuestionExists{Soal ditemukan?}
+    QuestionExists -- Tidak --> MissingQuestion[/Output: "Nomor soal tidak tersedia"/]
+    MissingQuestion --> ListQuestions
+
+    QuestionExists -- Ya --> ShowText[/Output: tampilkan judul dan teks soal/]
+    ShowText --> HasImage{Soal memiliki imagePath?}
+
+    HasImage -- Tidak --> PauseQuestion[/Input: tekan Enter/]
+    HasImage -- Ya --> RunChafa[Proses: jalankan Chafa untuk gambar soal]
+    RunChafa --> ChafaSuccess{Chafa berhasil?}
+    ChafaSuccess -- Ya --> ShowImage[/Output: gambar tampil di terminal/]
+    ChafaSuccess -- Tidak --> ChafaError[/Output: tampilkan pesan instalasi Chafa/]
+    ShowImage --> PauseQuestion
+    ChafaError --> PauseQuestion
+    PauseQuestion --> ListQuestions
+
+    classDef connector fill:#FFFFFF,stroke:#555555,color:#000,stroke-width:2px;
+    classDef process fill:#D6EAF8,stroke:#2874A6,color:#000,stroke-width:2px;
+    classDef io fill:#FDEBD0,stroke:#CA6F1E,color:#000,stroke-width:2px;
+    classDef decision fill:#F9E79F,stroke:#B7950B,color:#000,stroke-width:2px;
+
+    class SQEntry,SQReturn connector;
+    class ClearQuestionInput,IgnoreQuestionNewline,FindQuestion,RunChafa process;
+    class ListQuestions,InputQuestion,NumberError,MissingQuestion,ShowText,ShowImage,ChafaError,PauseQuestion io;
+    class QuestionIsNumber,BackToMain,QuestionExists,HasImage,ChafaSuccess decision;
+```
+
+## Halaman 3 — Subproses `solveQuestion()`
+
+```mermaid
+flowchart TD
+    SSQEntry((Dipanggil oleh main)) --> SolverMenu[/Output: tampilkan menu pemecahan soal/]
     SolverMenu --> SolverInput[/Input: pilih topik solver atau 0/]
-    SolverInput --> BackFromSolver{Pilihan = 0?}
-    BackFromSolver -- Ya --> Header
-    BackFromSolver -- Tidak --> SolverChoice{Topik solver?}
-    SolverChoice -- "1" --> Handshake[Proses: hitung jabat tangan]
-    SolverChoice -- "2" --> Regular[Proses: hitung atau validasi graf sederhana/teratur]
-    SolverChoice -- "3" --> Euler[Proses: cek dan buat rute Euler]
-    SolverChoice -- "4" --> Planar[Proses: uji batas planar dan rumus Euler]
-    SolverChoice -- "5" --> Coloring[Proses: pewarnaan Welch-Powell]
-    SolverChoice -- "6" --> Graphviz[Proses: ekspor DOT dan render PNG dengan Graphviz]
-    SolverChoice -- "Selain 1-6" --> SolverError[/Output: "Pilihan tidak tersedia"/]
-    Handshake --> SolverPause[/Input: tekan Enter/]
-    Regular --> SolverPause
+    SolverInput --> BackSolver{Pilihan = 0?}
+    BackSolver -- Ya --> SSQReturn((Kembali ke main))
+
+    BackSolver -- Tidak --> SolverChoice{Nilai pilihan solver?}
+    SolverChoice -- "1" --> Handshakes[[Subproses: solveHandshakes]]
+    SolverChoice -- "2" --> SimpleRegular[[Subproses: solveSimpleOrRegularGraph]]
+    SolverChoice -- "3" --> Euler[[Subproses: solveEuler; memakai Halaman 4]]
+    SolverChoice -- "4" --> Planar[[Subproses: solvePlanarEulerFormula]]
+    SolverChoice -- "5" --> Coloring[[Subproses: solveWelchPowell; memakai Halaman 4]]
+    SolverChoice -- "6" --> Graphviz[[Subproses: renderGraphviz; memakai Halaman 4]]
+    SolverChoice -- "Selain 1 sampai 6" --> SolverError[/Output: "Pilihan tidak tersedia"/]
+
+    Handshakes --> SolverPause[/Input: tekan Enter/]
+    SimpleRegular --> SolverPause
     Euler --> SolverPause
     Planar --> SolverPause
     Coloring --> SolverPause
@@ -87,50 +133,77 @@ flowchart TD
     SolverError --> SolverPause
     SolverPause --> SolverMenu
 
-    MainChoice -- "4. Keluar" --> StopLoop[Proses: systemRunning = false]
-    StopLoop --> End([Output: program berhenti dan tampilkan terima kasih])
-
-    MainChoice -- "Selain 1 sampai 4" --> ChoiceError[/Output: "Pilihan tidak tersedia"/]
-    ChoiceError --> MainPause
-
-    MainPause --> Header
-
-    classDef terminator fill:#D5F5E3,stroke:#1E8449,color:#000,stroke-width:2px;
-    classDef preparation fill:#E8DAEF,stroke:#7D3C98,color:#000,stroke-width:2px;
-    classDef process fill:#D6EAF8,stroke:#2874A6,color:#000,stroke-width:2px;
-    classDef inputOutput fill:#FDEBD0,stroke:#CA6F1E,color:#000,stroke-width:2px;
+    classDef connector fill:#FFFFFF,stroke:#555555,color:#000,stroke-width:2px;
+    classDef io fill:#FDEBD0,stroke:#CA6F1E,color:#000,stroke-width:2px;
     classDef decision fill:#F9E79F,stroke:#B7950B,color:#000,stroke-width:2px;
-    classDef subroutine fill:#D4E6F1,stroke:#2471A3,color:#000,stroke-width:2px;
+    classDef subprocess fill:#D4E6F1,stroke:#2471A3,color:#000,stroke-width:2px;
 
-    class Start,End terminator;
-    class PrepMain,TopicInit preparation;
-    class ResetInput,IgnoreNewline,IncreaseTopic,LoadQuestions,LoadQuestion,RunChafa,StopLoop,Graphviz process;
-    class Header,MainMenu,MainInput,NumberError,DefinitionOutput,MainPause,ListTopic,TopicMenu,TopicInput,TopicError,QuestionMenu,QuestionInput,QuestionError,TextQuestion,ImageShown,ChafaError,SolverMenu,SolverInput,SolverError,SolverPause,ChoiceError inputOutput;
-    class NumberValid,MainChoice,TopicLoop,BackFromTopic,TopicValid,BackFromQuestion,QuestionValid,ImageExists,ChafaSuccess,AskAnotherQuestion,AskAnotherTopic decision;
-    class Definition,QuestionModule,SolverModule subroutine;
+    class SSQEntry,SSQReturn connector;
+    class SolverMenu,SolverInput,SolverError,SolverPause io;
+    class BackSolver,SolverChoice decision;
+    class Handshakes,SimpleRegular,Euler,Planar,Coloring,Graphviz subprocess;
 ```
 
-## Konvensi flowchart
+## Halaman 4 — Subproses bersama `readUndirectedGraph()`
 
-| Simbol | Bentuk Mermaid | Fungsi |
+Subproses ini dipanggil oleh solver Euler, Welch-Powell, dan Graphviz. Agar diagram utama tidak terlalu rumit, detail pembacaan matriks ketetanggaan dipisahkan di sini.
+
+```mermaid
+flowchart TD
+    RUGEntry((Dipanggil oleh solver)) --> InputVertex[/Input: masukkan jumlah simpul 1 sampai 20/]
+    InputVertex --> VertexValid{Jumlah simpul valid?}
+
+    VertexValid -- Tidak --> VertexError[/Output: "Jumlah simpul harus antara 1 sampai 20"/]
+    VertexError --> RUGFalse((Kembalikan false))
+
+    VertexValid -- Ya --> InitMatrix{{Persiapan: isi seluruh graph[i][j] dengan 0; i = 0; j = 1}}
+    InitMatrix --> MorePairs{Masih ada pasangan simpul?}
+
+    MorePairs -- Ya --> InputEdge[/Input: masukkan nilai sisi 0 atau 1/]
+    InputEdge --> EdgeValid{Nilai sisi 0 atau 1?}
+    EdgeValid -- Tidak --> EdgeError[/Output: "Masukkan hanya 0 atau 1"/]
+    EdgeError --> InputEdge
+
+    EdgeValid -- Ya --> SaveEdge[Proses: graph[i][j] dan graph[j][i] = nilai sisi]
+    SaveEdge --> NextPair[Proses: lanjutkan ke pasangan simpul berikutnya]
+    NextPair --> MorePairs
+
+    MorePairs -- Tidak --> RUGTrue((Kembalikan true))
+
+    classDef connector fill:#FFFFFF,stroke:#555555,color:#000,stroke-width:2px;
+    classDef preparation fill:#E8DAEF,stroke:#7D3C98,color:#000,stroke-width:2px;
+    classDef process fill:#D6EAF8,stroke:#2874A6,color:#000,stroke-width:2px;
+    classDef io fill:#FDEBD0,stroke:#CA6F1E,color:#000,stroke-width:2px;
+    classDef decision fill:#F9E79F,stroke:#B7950B,color:#000,stroke-width:2px;
+
+    class RUGEntry,RUGFalse,RUGTrue connector;
+    class InitMatrix preparation;
+    class SaveEdge,NextPair process;
+    class InputVertex,VertexError,InputEdge,EdgeError io;
+    class VertexValid,MorePairs,EdgeValid decision;
+```
+
+## Shape convention
+
+| Symbol | Mermaid form | Meaning |
 |---|---|---|
-| Terminator | `([ ... ])` | Awal atau akhir program |
-| **Preparation / initialization** | `{{ ... }}` | Inisialisasi variabel sebelum proses atau loop |
-| Process | `[ ... ]` | Perhitungan atau operasi program |
-| Input/Output | `[/ ... /]` | Membaca masukan atau menampilkan keluaran |
-| Decision | `{ ... }` | Kondisi yang memiliki cabang Ya/Tidak atau beberapa pilihan |
-| Subprogram | `[[ ... ]]` | Pemanggilan fungsi |
+| Terminator | `([ ... ])` | Only the main program start/end |
+| Preparation | `{{ ... }}` | Variable or matrix initialization |
+| Process | `[ ... ]` | Calculation or state-changing operation |
+| Input/Output | `[/ ... /]` | Read input or write terminal output |
+| Decision | `{ ... }` | One input, multiple labelled output branches |
+| Subprocess | `[[ ... ]]` | A function detailed on another page |
+| Connector | `(( ... ))` | Cross-page call/return point for a subprocess |
 
-## Cakupan loop pertanyaan
+## Verification checklist
 
-1. `topicIndex` berjalan dari **1 sampai 18** supaya setiap topik dan soal terkait masuk ke daftar.
-2. Pilihan topik yang salah kembali ke daftar topik.
-3. Pilihan soal yang salah kembali ke daftar soal topik tersebut.
-4. Setelah melihat soal, pengguna dapat melihat soal lain dalam topik yang sama, berpindah topik, atau kembali ke menu utama.
-5. Setiap cabang sukses dan gagal pada Chafa kembali ke alur yang sama, sehingga tidak ada *error gap*.
+- The main diagram has one start symbol and one end symbol.
+- Every decision has all of its outcomes labelled.
+- All non-terminal paths return to the menu or to the calling process.
+- Complex logic is split into subprocess pages instead of using crossed arrows.
+- Every diagram flows from top to bottom with concise labels.
 
-## Referensi
+## References
 
-- `example/TugasKelompokKombinasiDariBapakNovridoCharibaldiYangTerhormat.cpp`: struktur menu, validasi input, percabangan, dan loop kembali ke menu.
-- `example/kombinasi.drawio`: penggunaan proses, input/output, keputusan, cabang, dan panah kembali.
-- `main.cpp`: alur menu Graf saat ini.
+- [ProcessOn — Flowchart Drawing Specifications](https://www.processon.io/blog/flowchart-drawing-specifications)
+- `main.cpp` — source of the actual program flow
