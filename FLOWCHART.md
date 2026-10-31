@@ -156,7 +156,7 @@ flowchart TD
     VertexValid -- Tidak --> VertexError[/Output: "Jumlah simpul harus antara 1 sampai 20"/]
     VertexError --> RUGFalse((Kembalikan false))
 
-    VertexValid -- Ya --> InitMatrix{{Persiapan: isi seluruh graph[i][j] dengan 0; i = 0; j = 1}}
+    VertexValid -- Ya --> InitMatrix{{Persiapan: isi matriks dengan 0; i = 0; j = 1}}
     InitMatrix --> MorePairs{Masih ada pasangan simpul?}
 
     MorePairs -- Ya --> InputEdge[/Input: masukkan nilai sisi 0 atau 1/]
@@ -164,7 +164,7 @@ flowchart TD
     EdgeValid -- Tidak --> EdgeError[/Output: "Masukkan hanya 0 atau 1"/]
     EdgeError --> InputEdge
 
-    EdgeValid -- Ya --> SaveEdge[Proses: graph[i][j] dan graph[j][i] = nilai sisi]
+    EdgeValid -- Ya --> SaveEdge[Proses: simpan nilai sisi secara simetris]
     SaveEdge --> NextPair[Proses: lanjutkan ke pasangan simpul berikutnya]
     NextPair --> MorePairs
 
