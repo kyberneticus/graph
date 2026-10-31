@@ -1,13 +1,16 @@
-#include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 using namespace std;
 
+const int MAX_VERTICES = 20;
+const int MAX_TRAIL = MAX_VERTICES * (MAX_VERTICES - 1) / 2 + 1;
+
+// Menampilkan garis pemisah untuk membatasi bagian keluaran terminal.
 void printSeparator() { cout << "===================" << endl; }
 
+// Menampilkan judul program pada bagian atas.
 void printHeader() {
   printSeparator();
   cout << "       Graph       " << endl;
@@ -164,20 +167,23 @@ const Question questions[] = {
 
 const int questionCount = sizeof(questions) / sizeof(questions[0]);
 
+// Menampilkan daftar soal latihan dan menerima nomor soal dari pengguna.
+// Gambar graf terkait ditampilkan dengan Chafa bila file gambarnya tersedia.
 void showQuestion() {
   while (true) {
-    cout << "===================== DAFTAR SOAL =====================\n";
-    cout << "Sumber: Matematika Diskrit - Bab 8 Graf, halaman 437-442.\n\n";
+    cout << "===================== DAFTAR SOAL =====================" << endl;
+    cout << "Sumber: Matematika Diskrit - Bab 8 Graf, halaman 437-442." << endl
+         << endl;
 
     for (const Question &question : questions) {
-      cout << question.number << ". " << question.title << '\n';
+      cout << question.number << ". " << question.title << endl;
     }
-    cout << "0. Kembali ke Main Menu\n\n";
+    cout << "0. Kembali ke Main Menu" << endl << endl;
     cout << "Pilih nomor soal: ";
 
     int selectedNumber;
     if (!(cin >> selectedNumber)) {
-      cout << "Input harus berupa angka.\n\n";
+      cout << "Input harus berupa angka." << endl << endl;
       cin.clear();
       cin.ignore(1000, '\n');
       continue;
@@ -196,108 +202,131 @@ void showQuestion() {
     }
 
     if (selectedQuestion == nullptr) {
-      cout << "Nomor soal tidak tersedia.\n\n";
+      cout << "Nomor soal tidak tersedia." << endl << endl;
       continue;
     }
 
-    cout << "\n======================= SOAL " << selectedQuestion->number
-         << " =======================\n";
-    cout << selectedQuestion->title << "\n\n";
-    cout << selectedQuestion->text << "\n";
+    cout << endl
+         << "======================= SOAL " << selectedQuestion->number
+         << " =======================" << endl;
+    cout << selectedQuestion->title << endl << endl;
+    cout << selectedQuestion->text << endl;
 
     if (selectedQuestion->imagePath != nullptr) {
-      cout << "\nGambar graf:\n";
+      cout << endl << "Gambar graf:" << endl;
       string command =
           "chafa --size=45x14 " + string(selectedQuestion->imagePath);
       if (system(command.c_str()) != 0) {
-        cout << "Gambar tidak dapat ditampilkan. Install Chafa dengan:\n";
-        cout << "sudo apt install chafa\n";
+        cout << "Gambar tidak dapat ditampilkan. Install Chafa dengan:" << endl;
+        cout << "sudo apt install chafa" << endl;
       }
     }
 
-    cout << "\nTekan Enter untuk kembali ke daftar soal...";
+    cout << endl << "Tekan Enter untuk kembali ke daftar soal...";
     cin.get();
-    cout << "\n";
+    cout << endl;
   }
 }
 
+// Menampilkan ringkasan definisi materi graf dalam bahasa Indonesia.
+// Isi definisi sesuai dengan materi yang dicatat pada proyek ini.
 void showDefinition() {
-  cout << "=================== DEFINISI MATERI ===================\n\n";
+  cout << "=================== DEFINISI MATERI ===================" << endl
+       << endl;
 
-  cout << "1. GRAF\n";
-  cout << "   Graf G = (V, E) terdiri dari himpunan simpul (vertex) V dan\n";
-  cout << "   himpunan sisi (edge) E yang menghubungkan pasangan simpul.\n\n";
+  cout << "1. GRAF" << endl;
+  cout << "   Graf G = (V, E) terdiri dari himpunan simpul (vertex) V dan"
+       << endl;
+  cout << "   himpunan sisi (edge) E yang menghubungkan pasangan simpul."
+       << endl
+       << endl;
 
-  cout << "2. JENIS GRAF\n";
-  cout << "   Graf sederhana tidak memiliki loop atau sisi ganda. Graf "
-          "berarah\n";
-  cout << "   memiliki arah pada sisi, sedangkan graf tak berarah tidak.\n\n";
+  cout << "2. JENIS GRAF" << endl;
+  cout << "   Graf sederhana tidak memiliki loop atau sisi ganda. Graf berarah"
+       << endl;
+  cout << "   memiliki arah pada sisi, sedangkan graf tak berarah tidak."
+       << endl
+       << endl;
 
-  cout << "3. KETETANGGAAN, INSIDENSI, DAN SIMPUL KHUSUS\n";
-  cout << "   Dua simpul bertetangga jika dihubungkan langsung oleh sisi. "
-          "Sisi\n";
-  cout << "   bersisian dengan simpul pada ujungnya; simpul terpencil tidak\n";
-  cout << "   memiliki sisi dan simpul pendant berderajat satu.\n\n";
+  cout << "3. KETETANGGAAN, INSIDENSI, DAN SIMPUL KHUSUS" << endl;
+  cout << "   Dua simpul bertetangga jika dihubungkan langsung oleh sisi. Sisi"
+       << endl;
+  cout << "   bersisian dengan simpul pada ujungnya; simpul terpencil tidak"
+       << endl;
+  cout << "   memiliki sisi dan simpul pendant berderajat satu." << endl
+       << endl;
 
-  cout << "4. DERAJAT SIMPUL DAN LEMMA JABAT TANGAN\n";
-  cout << "   Derajat adalah banyak sisi yang bersisian dengan suatu simpul.\n";
-  cout << "   Jumlah semua derajat graf tak berarah adalah dua kali jumlah "
-          "sisi.\n\n";
-
-  cout << "5. LINTASAN, SIRKUIT, DAN KETERHUBUNGAN\n";
-  cout << "   Lintasan adalah urutan simpul yang dihubungkan sisi. Sirkuit\n";
-  cout << "   berawal dan berakhir pada simpul yang sama.\n\n";
-
-  cout << "6. SUBGRAF, KOMPONEN, DAN CUT-SET\n";
-  cout << "   Subgraf adalah bagian dari graf asal. Komponen adalah subgraf\n";
-  cout << "   terhubung maksimal. Cut-set membuat graf tidak terhubung jika "
-          "dihapus.\n\n";
-
-  cout << "7. GRAF KHUSUS\n";
-  cout << "   Graf lengkap menghubungkan setiap pasangan simpul. Graf "
-          "lingkaran\n";
+  cout << "4. DERAJAT SIMPUL DAN LEMMA JABAT TANGAN" << endl;
+  cout << "   Derajat adalah banyak sisi yang bersisian dengan suatu simpul."
+       << endl;
   cout
-      << "   berderajat dua, graf teratur berderajat sama, dan graf bipartit\n";
-  cout << "   membagi simpul menjadi dua himpunan.\n\n";
+      << "   Jumlah semua derajat graf tak berarah adalah dua kali jumlah sisi."
+      << endl
+      << endl;
 
-  cout << "8. REPRESENTASI GRAF\n";
-  cout << "   Graf dapat direpresentasikan dengan matriks ketetanggaan, "
-          "matriks\n";
-  cout << "   insidensi, atau senarai ketetanggaan.\n\n";
+  cout << "5. LINTASAN, SIRKUIT, DAN KETERHUBUNGAN" << endl;
+  cout << "   Lintasan adalah urutan simpul yang dihubungkan sisi. Sirkuit"
+       << endl;
+  cout << "   berawal dan berakhir pada simpul yang sama." << endl << endl;
 
-  cout << "9. BFS DAN DFS\n";
-  cout
-      << "   BFS menelusuri graf per tingkat. DFS menelusuri sedalam mungkin\n";
-  cout << "   sebelum kembali ke simpul sebelumnya.\n\n";
+  cout << "6. SUBGRAF, KOMPONEN, DAN CUT-SET" << endl;
+  cout << "   Subgraf adalah bagian dari graf asal. Komponen adalah subgraf"
+       << endl;
+  cout << "   terhubung maksimal. Cut-set membuat graf tidak terhubung jika"
+       << endl;
+  cout << "   dihapus." << endl << endl;
 
-  cout << "10. TOPOLOGICAL SORT\n";
-  cout
-      << "    Pengurutan linear simpul pada graf berarah tanpa siklus (DAG),\n";
-  cout << "    sehingga simpul asal suatu sisi berada sebelum simpul "
-          "tujuannya.\n\n";
+  cout << "7. GRAF KHUSUS" << endl;
+  cout << "   Graf lengkap menghubungkan setiap pasangan simpul. Graf lingkaran"
+       << endl;
+  cout << "   berderajat dua, graf teratur berderajat sama, dan graf bipartit"
+       << endl;
+  cout << "   membagi simpul menjadi dua himpunan." << endl << endl;
 
-  cout << "11. GRAF ISOMORFIK\n";
-  cout << "    Dua graf isomorfik memiliki struktur hubungan yang sama "
-          "walaupun\n";
-  cout << "    nama atau gambar simpul dan sisinya berbeda.\n\n";
+  cout << "8. REPRESENTASI GRAF" << endl;
+  cout << "   Graf dapat direpresentasikan dengan matriks ketetanggaan, matriks"
+       << endl;
+  cout << "   insidensi, atau senarai ketetanggaan." << endl << endl;
 
-  cout << "12. GRAF PLANAR\n";
-  cout << "    Graf planar dapat digambar tanpa sisi saling berpotongan. "
-          "Untuk\n";
-  cout << "    graf planar terhubung: simpul - sisi + wilayah = 2.\n\n";
+  cout << "9. BFS DAN DFS" << endl;
+  cout << "   BFS menelusuri graf per tingkat. DFS menelusuri sedalam mungkin"
+       << endl;
+  cout << "   sebelum kembali ke simpul sebelumnya." << endl << endl;
 
-  cout << "13. LINTASAN DAN SIRKUIT EULER\n";
+  cout << "10. TOPOLOGICAL SORT" << endl;
+  cout << "    Pengurutan linear simpul pada graf berarah tanpa siklus (DAG),"
+       << endl;
+  cout << "    sehingga simpul asal suatu sisi berada sebelum simpul tujuannya."
+       << endl
+       << endl;
+
+  cout << "11. GRAF ISOMORFIK" << endl;
+  cout << "    Dua graf isomorfik memiliki struktur hubungan yang sama walaupun"
+       << endl;
+  cout << "    nama atau gambar simpul dan sisinya berbeda." << endl << endl;
+
+  cout << "12. GRAF PLANAR" << endl;
+  cout << "    Graf planar dapat digambar tanpa sisi saling berpotongan. Untuk"
+       << endl;
+  cout << "    graf planar terhubung: simpul - sisi + wilayah = 2." << endl
+       << endl;
+
+  cout << "13. LINTASAN DAN SIRKUIT EULER" << endl;
   cout << "    Lintasan Euler melewati setiap sisi tepat satu kali. Sirkuit "
-          "Euler\n";
-  cout << "    juga kembali ke simpul awal.\n\n";
+          "Euler"
+       << endl;
+  cout << "    juga kembali ke simpul awal." << endl << endl;
 
-  cout << "14. LINTASAN DAN SIRKUIT HAMILTON\n";
-  cout << "    Lintasan Hamilton mengunjungi setiap simpul tepat satu kali.\n";
-  cout << "    Sirkuit Hamilton kembali ke simpul awal.\n\n";
+  cout << "14. LINTASAN DAN SIRKUIT HAMILTON" << endl;
+  cout << "    Lintasan Hamilton mengunjungi setiap simpul tepat satu kali."
+       << endl;
+  cout << "    Sirkuit Hamilton kembali ke simpul awal." << endl << endl;
 
-  cout << "========================================================\n";
+  cout << "========================================================" << endl;
 }
 
+// Membaca satu bilangan bulat sambil menampilkan pesan input yang diberikan.
+// Input selain angka dibersihkan agar pengguna dapat mencoba kembali.
 int readInteger(const string &prompt) {
   int value;
 
@@ -308,31 +337,37 @@ int readInteger(const string &prompt) {
       return value;
     }
 
-    cout << "Input harus berupa angka.\n";
+    cout << "Input harus berupa angka." << endl;
     cin.clear();
     cin.ignore(1000, '\n');
   }
 }
 
-bool readUndirectedGraph(vector<vector<int>> &graph) {
-  int vertexCount = readInteger("Jumlah simpul (1-20): ");
-  if (vertexCount < 1 || vertexCount > 20) {
-    cout << "Jumlah simpul harus antara 1 sampai 20.\n";
+// Membaca graf sederhana tak berarah sebagai matriks ketetanggaan 0 atau 1.
+// Matriks memakai array tetap karena program membatasi graf hingga 20 simpul.
+bool readUndirectedGraph(int graph[MAX_VERTICES][MAX_VERTICES],
+                         int &vertexCount) {
+  vertexCount = readInteger("Jumlah simpul (1-20): ");
+  if (vertexCount < 1 || vertexCount > MAX_VERTICES) {
+    cout << "Jumlah simpul harus antara 1 sampai 20." << endl;
     return false;
   }
 
-  graph.assign(vertexCount, vector<int>(vertexCount, 0));
-  cout << "Masukkan 1 jika ada sisi dan 0 jika tidak ada sisi.\n";
+  for (int i = 0; i < MAX_VERTICES; ++i) {
+    for (int j = 0; j < MAX_VERTICES; ++j) {
+      graph[i][j] = 0;
+    }
+  }
 
+  cout << "Masukkan 1 jika ada sisi dan 0 jika tidak ada sisi." << endl;
   for (int i = 0; i < vertexCount; ++i) {
     for (int j = i + 1; j < vertexCount; ++j) {
       int edge;
       do {
         edge = readInteger("Sisi " + to_string(i + 1) + " - " +
                            to_string(j + 1) + ": ");
-        if (edge != 0 && edge != 1) {
-          cout << "Masukkan hanya 0 atau 1.\n";
-        }
+        if (edge != 0 && edge != 1)
+          cout << "Masukkan hanya 0 atau 1." << endl;
       } while (edge != 0 && edge != 1);
 
       graph[i][j] = edge;
@@ -343,22 +378,25 @@ bool readUndirectedGraph(vector<vector<int>> &graph) {
   return true;
 }
 
-vector<int> graphDegrees(const vector<vector<int>> &graph) {
-  vector<int> degrees(graph.size(), 0);
-
-  for (int i = 0; i < static_cast<int>(graph.size()); ++i) {
-    for (int j = 0; j < static_cast<int>(graph.size()); ++j) {
+// Menghitung derajat setiap simpul dari matriks ketetanggaan graf.
+// Nilai hasil pada indeks i adalah derajat simpul i + 1.
+void graphDegrees(const int graph[MAX_VERTICES][MAX_VERTICES], int vertexCount,
+                  int degrees[MAX_VERTICES]) {
+  for (int i = 0; i < vertexCount; ++i) {
+    degrees[i] = 0;
+    for (int j = 0; j < vertexCount; ++j) {
       degrees[i] += graph[i][j];
     }
   }
-
-  return degrees;
 }
 
-bool isConnectedIgnoringIsolated(const vector<vector<int>> &graph,
-                                 const vector<int> &degrees) {
+// Memeriksa keterhubungan semua simpul yang mempunyai setidaknya satu sisi.
+// Simpul terpencil diabaikan karena tidak memengaruhi syarat lintasan Euler.
+bool isConnectedIgnoringIsolated(const int graph[MAX_VERTICES][MAX_VERTICES],
+                                 int vertexCount,
+                                 const int degrees[MAX_VERTICES]) {
   int start = -1;
-  for (int i = 0; i < static_cast<int>(degrees.size()); ++i) {
+  for (int i = 0; i < vertexCount; ++i) {
     if (degrees[i] > 0) {
       start = i;
       break;
@@ -367,57 +405,61 @@ bool isConnectedIgnoringIsolated(const vector<vector<int>> &graph,
   if (start == -1)
     return true;
 
-  vector<bool> visited(graph.size(), false);
-  vector<int> stack = {start};
+  bool visited[MAX_VERTICES] = {};
+  int stack[MAX_VERTICES];
+  int stackSize = 0;
+  stack[stackSize++] = start;
   visited[start] = true;
 
-  while (!stack.empty()) {
-    int vertex = stack.back();
-    stack.pop_back();
+  while (stackSize > 0) {
+    int vertex = stack[--stackSize];
 
-    for (int neighbor = 0; neighbor < static_cast<int>(graph.size());
-         ++neighbor) {
+    for (int neighbor = 0; neighbor < vertexCount; ++neighbor) {
       if (graph[vertex][neighbor] == 1 && !visited[neighbor]) {
         visited[neighbor] = true;
-        stack.push_back(neighbor);
+        stack[stackSize++] = neighbor;
       }
     }
   }
 
-  for (int i = 0; i < static_cast<int>(degrees.size()); ++i) {
+  for (int i = 0; i < vertexCount; ++i) {
     if (degrees[i] > 0 && !visited[i])
       return false;
   }
   return true;
 }
 
+// Menyelesaikan soal jabat tangan dengan model graf lengkap K_n.
+// Hasil dihitung menggunakan rumus n(n - 1) / 2.
 void solveHandshakes() {
   int people;
   do {
     people = readInteger("Jumlah orang: ");
     if (people < 0)
-      cout << "Jumlah orang tidak boleh negatif.\n";
+      cout << "Jumlah orang tidak boleh negatif." << endl;
   } while (people < 0);
 
   long long handshakes = 1LL * people * (people - 1) / 2;
-  cout << "\nModel: graf lengkap K_" << people << ".\n";
+  cout << endl << "Model: graf lengkap K_" << people << "." << endl;
   cout << "Jumlah jabat tangan = n(n-1)/2 = " << people << "(" << people
-       << "-1)/2 = " << handshakes << ".\n";
+       << "-1)/2 = " << handshakes << "." << endl;
 }
 
+// Menghitung sisi maksimum graf sederhana atau memvalidasi graf teratur.
+// Pengguna memilih jenis perhitungan yang ingin dijalankan dari submenu.
 void solveSimpleOrRegularGraph() {
-  cout << "\n1. Jumlah sisi maksimum graf sederhana\n";
-  cout << "2. Validasi graf teratur sederhana\n";
+  cout << endl << "1. Jumlah sisi maksimum graf sederhana" << endl;
+  cout << "2. Validasi graf teratur sederhana" << endl;
   int choice = readInteger("Pilih (1-2): ");
 
   if (choice == 1) {
     int vertices = readInteger("Jumlah simpul: ");
     if (vertices < 0) {
-      cout << "Jumlah simpul tidak boleh negatif.\n";
+      cout << "Jumlah simpul tidak boleh negatif." << endl;
       return;
     }
     cout << "Jumlah sisi maksimum = n(n-1)/2 = "
-         << 1LL * vertices * (vertices - 1) / 2 << ".\n";
+         << 1LL * vertices * (vertices - 1) / 2 << "." << endl;
     return;
   }
 
@@ -427,31 +469,37 @@ void solveSimpleOrRegularGraph() {
 
     if (vertices < 1 || degree < 0 || degree >= vertices ||
         (1LL * vertices * degree) % 2 != 0) {
-      cout << "Graf r-teratur sederhana tidak mungkin untuk nilai tersebut.\n";
+      cout << "Graf r-teratur sederhana tidak mungkin untuk nilai tersebut."
+           << endl;
       return;
     }
 
     cout << "Graf " << degree << "-teratur dengan " << vertices
-         << " simpul mungkin dibuat.\n";
+         << " simpul mungkin dibuat." << endl;
     cout << "Jumlah sisinya = nr/2 = " << vertices << " x " << degree
-         << " / 2 = " << 1LL * vertices * degree / 2 << ".\n";
+         << " / 2 = " << 1LL * vertices * degree / 2 << "." << endl;
     return;
   }
 
-  cout << "Pilihan tidak tersedia.\n";
+  cout << "Pilihan tidak tersedia." << endl;
 }
 
+// Memeriksa apakah graf mempunyai lintasan atau sirkuit Euler.
+// Jika ada, fungsi membentuk dan menampilkan rute Euler dengan algoritma
+// Hierholzer.
 void solveEuler() {
-  vector<vector<int>> graph;
-  if (!readUndirectedGraph(graph))
+  int graph[MAX_VERTICES][MAX_VERTICES];
+  int vertexCount;
+  if (!readUndirectedGraph(graph, vertexCount))
     return;
 
-  vector<int> degrees = graphDegrees(graph);
+  int degrees[MAX_VERTICES];
+  graphDegrees(graph, vertexCount, degrees);
   int edgeCount = 0;
   int oddCount = 0;
   int start = -1;
 
-  for (int i = 0; i < static_cast<int>(graph.size()); ++i) {
+  for (int i = 0; i < vertexCount; ++i) {
     edgeCount += degrees[i];
     if (degrees[i] % 2 != 0) {
       ++oddCount;
@@ -463,94 +511,121 @@ void solveEuler() {
   edgeCount /= 2;
 
   if (edgeCount == 0) {
-    cout << "Graf tidak memiliki sisi untuk dilalui.\n";
+    cout << "Graf tidak memiliki sisi untuk dilalui." << endl;
     return;
   }
-  if (!isConnectedIgnoringIsolated(graph, degrees) || oddCount > 2) {
-    cout << "Graf tidak memiliki lintasan Euler.\n";
+  if (!isConnectedIgnoringIsolated(graph, vertexCount, degrees) ||
+      oddCount > 2) {
+    cout << "Graf tidak memiliki lintasan Euler." << endl;
     return;
   }
 
-  cout << (oddCount == 0
-               ? "Graf memiliki sirkuit Euler.\n"
-               : "Graf memiliki lintasan Euler, tetapi bukan sirkuit Euler.\n");
+  if (oddCount == 0)
+    cout << "Graf memiliki sirkuit Euler." << endl;
+  else
+    cout << "Graf memiliki lintasan Euler, tetapi bukan sirkuit Euler." << endl;
 
-  vector<vector<int>> remaining = graph;
-  vector<int> stack = {start};
-  vector<int> trail;
-
-  while (!stack.empty()) {
-    int vertex = stack.back();
-    int neighbor = 0;
-    while (neighbor < static_cast<int>(remaining.size()) &&
-           remaining[vertex][neighbor] == 0) {
-      ++neighbor;
+  int remaining[MAX_VERTICES][MAX_VERTICES];
+  for (int i = 0; i < vertexCount; ++i) {
+    for (int j = 0; j < vertexCount; ++j) {
+      remaining[i][j] = graph[i][j];
     }
+  }
 
-    if (neighbor == static_cast<int>(remaining.size())) {
-      trail.push_back(vertex);
-      stack.pop_back();
+  int stack[MAX_TRAIL];
+  int trail[MAX_TRAIL];
+  int stackSize = 0;
+  int trailSize = 0;
+  stack[stackSize++] = start;
+
+  while (stackSize > 0) {
+    int vertex = stack[stackSize - 1];
+    int neighbor = 0;
+    while (neighbor < vertexCount && remaining[vertex][neighbor] == 0)
+      ++neighbor;
+
+    if (neighbor == vertexCount) {
+      trail[trailSize++] = vertex;
+      --stackSize;
     } else {
       remaining[vertex][neighbor] = 0;
       remaining[neighbor][vertex] = 0;
-      stack.push_back(neighbor);
+      stack[stackSize++] = neighbor;
     }
   }
 
-  reverse(trail.begin(), trail.end());
   cout << "Rute Euler: ";
-  for (int i = 0; i < static_cast<int>(trail.size()); ++i) {
-    cout << trail[i] + 1
-         << (i + 1 == static_cast<int>(trail.size()) ? "\n" : " -> ");
+  for (int i = trailSize - 1; i >= 0; --i) {
+    cout << trail[i] + 1;
+    if (i == 0)
+      cout << endl;
+    else
+      cout << " -> ";
   }
 }
 
+// Memeriksa batas jumlah sisi untuk graf planar sederhana.
+// Fungsi juga menghitung jumlah wilayah jika graf tersebut planar dan
+// terhubung.
 void solvePlanarEulerFormula() {
   int vertices = readInteger("Jumlah simpul n: ");
   int edges = readInteger("Jumlah sisi e: ");
 
   if (vertices < 3 || edges < 0) {
-    cout << "Masukkan n minimal 3 dan jumlah sisi tidak negatif.\n";
+    cout << "Masukkan n minimal 3 dan jumlah sisi tidak negatif." << endl;
     return;
   }
 
   int maximumPlanarEdges = 3 * vertices - 6;
   cout << "Batas graf planar sederhana: e <= 3n - 6 = " << maximumPlanarEdges
-       << ".\n";
+       << "." << endl;
 
   if (edges > maximumPlanarEdges) {
-    cout << "Graf pasti tidak planar karena jumlah sisinya melebihi batas.\n";
+    cout << "Graf pasti tidak planar karena jumlah sisinya melebihi batas."
+         << endl;
     return;
   }
 
-  cout << "Graf lulus batas perlu ini, tetapi belum tentu planar.\n";
+  cout << "Graf lulus batas perlu ini, tetapi belum tentu planar." << endl;
   cout << "Jika graf terhubung dan planar, jumlah wilayah f = 2 - n + e = "
-       << 2 - vertices + edges << ".\n";
+       << 2 - vertices + edges << "." << endl;
 }
 
+// Mewarnai graf tak berarah menggunakan urutan derajat Welch-Powell.
+// Warna yang dihasilkan valid, tetapi belum tentu merupakan jumlah warna
+// minimum.
 void solveWelchPowell() {
-  vector<vector<int>> graph;
-  if (!readUndirectedGraph(graph))
+  int graph[MAX_VERTICES][MAX_VERTICES];
+  int vertexCount;
+  if (!readUndirectedGraph(graph, vertexCount))
     return;
 
-  vector<int> degrees = graphDegrees(graph);
-  vector<int> order(graph.size());
-  for (int i = 0; i < static_cast<int>(order.size()); ++i)
+  int degrees[MAX_VERTICES];
+  int order[MAX_VERTICES];
+  int colors[MAX_VERTICES];
+  graphDegrees(graph, vertexCount, degrees);
+
+  for (int i = 0; i < vertexCount; ++i) {
     order[i] = i;
+    colors[i] = -1;
+  }
 
-  sort(order.begin(), order.end(), [&degrees](int left, int right) {
-    if (degrees[left] != degrees[right])
-      return degrees[left] > degrees[right];
-    return left < right;
-  });
+  for (int i = 0; i < vertexCount - 1; ++i) {
+    for (int j = i + 1; j < vertexCount; ++j) {
+      if (degrees[order[j]] > degrees[order[i]]) {
+        int temporary = order[i];
+        order[i] = order[j];
+        order[j] = temporary;
+      }
+    }
+  }
 
-  vector<int> colors(graph.size(), -1);
   int colorCount = 0;
+  for (int i = 0; i < vertexCount; ++i) {
+    int vertex = order[i];
+    bool unavailable[MAX_VERTICES] = {};
 
-  for (int vertex : order) {
-    vector<bool> unavailable(graph.size(), false);
-    for (int neighbor = 0; neighbor < static_cast<int>(graph.size());
-         ++neighbor) {
+    for (int neighbor = 0; neighbor < vertexCount; ++neighbor) {
       if (graph[vertex][neighbor] == 1 && colors[neighbor] != -1) {
         unavailable[colors[neighbor]] = true;
       }
@@ -564,63 +639,75 @@ void solveWelchPowell() {
       colorCount = color + 1;
   }
 
-  cout << "\nHasil pewarnaan Welch-Powell:\n";
-  for (int vertex = 0; vertex < static_cast<int>(colors.size()); ++vertex) {
+  cout << endl << "Hasil pewarnaan Welch-Powell:" << endl;
+  for (int vertex = 0; vertex < vertexCount; ++vertex) {
     cout << "Simpul " << vertex + 1 << " -> warna " << colors[vertex] + 1
-         << '\n';
+         << endl;
   }
-  cout << "Jumlah warna yang dipakai: " << colorCount << ".\n";
+  cout << "Jumlah warna yang dipakai: " << colorCount << "." << endl;
   cout << "Catatan: Welch-Powell menghasilkan pewarnaan valid, tidak selalu "
-          "jumlah warna minimum.\n";
+          "jumlah warna minimum."
+       << endl;
 }
 
+// Mengekspor graf masukan ke file DOT dan merendernya dengan Graphviz.
+// PNG hasil render disimpan lalu ditampilkan di terminal menggunakan Chafa.
 void renderGraphviz() {
-  vector<vector<int>> graph;
-  if (!readUndirectedGraph(graph))
+  int graph[MAX_VERTICES][MAX_VERTICES];
+  int vertexCount;
+  if (!readUndirectedGraph(graph, vertexCount))
     return;
 
   ofstream dotFile("graphviz-output.dot");
   if (!dotFile) {
-    cout << "Gagal membuat file graphviz-output.dot.\n";
+    cout << "Gagal membuat file graphviz-output.dot." << endl;
     return;
   }
 
-  dotFile << "graph G {\n";
-  dotFile << "  layout=neato;\n";
-  dotFile << "  node [shape=circle, style=filled, fillcolor=lightblue];\n";
+  dotFile << "graph G {" << endl;
+  dotFile << "  layout=neato;" << endl;
+  dotFile << "  node [shape=circle, style=filled, fillcolor=lightblue];"
+          << endl;
 
-  for (int vertex = 0; vertex < static_cast<int>(graph.size()); ++vertex)
-    dotFile << "  " << vertex + 1 << ";\n";
+  for (int vertex = 0; vertex < vertexCount; ++vertex)
+    dotFile << "  " << vertex + 1 << ";" << endl;
 
-  for (int from = 0; from < static_cast<int>(graph.size()); ++from) {
-    for (int to = from + 1; to < static_cast<int>(graph.size()); ++to) {
+  for (int from = 0; from < vertexCount; ++from) {
+    for (int to = from + 1; to < vertexCount; ++to) {
       if (graph[from][to] == 1)
-        dotFile << "  " << from + 1 << " -- " << to + 1 << ";\n";
+        dotFile << "  " << from + 1 << " -- " << to + 1 << ";" << endl;
     }
   }
-  dotFile << "}\n";
+  dotFile << "}" << endl;
   dotFile.close();
 
-  if (system("dot -Tpng -Gdpi=300 graphviz-output.dot -o graphviz-output.png") != 0) {
-    cout << "Graphviz gagal merender gambar. Pastikan dot sudah terinstall.\n";
+  if (system(
+          "dot -Tpng -Gdpi=300 graphviz-output.dot -o graphviz-output.png") !=
+      0) {
+    cout << "Graphviz gagal merender gambar. Pastikan dot sudah terinstall."
+         << endl;
     return;
   }
 
-  cout << "File dibuat: graphviz-output.dot dan graphviz-output.png\n";
+  cout << "File dibuat: graphviz-output.dot dan graphviz-output.png" << endl;
   if (system("chafa --size=45x14 graphviz-output.png") != 0)
-    cout << "PNG berhasil dibuat, tetapi Chafa tidak dapat menampilkannya.\n";
+    cout << "PNG berhasil dibuat, tetapi Chafa tidak dapat menampilkannya."
+         << endl;
 }
 
+// Menampilkan submenu pemecahan soal berdasarkan topik graf yang didukung.
+// Setiap pilihan menjalankan solver interaktif lalu kembali ke submenu ini.
 void solveQuestion() {
   while (true) {
-    cout << "\n=================== PECAHKAN SOAL ====================\n";
-    cout << "1. Jabat tangan (graf lengkap)\n";
-    cout << "2. Graf sederhana dan graf teratur\n";
-    cout << "3. Lintasan atau sirkuit Euler\n";
-    cout << "4. Graf planar dan rumus Euler\n";
-    cout << "5. Pewarnaan graf Welch-Powell\n";
-    cout << "6. Gambar graf dengan Graphviz\n";
-    cout << "0. Kembali ke Main Menu\n";
+    cout << endl
+         << "=================== PECAHKAN SOAL ====================" << endl;
+    cout << "1. Jabat tangan (graf lengkap)" << endl;
+    cout << "2. Graf sederhana dan graf teratur" << endl;
+    cout << "3. Lintasan atau sirkuit Euler" << endl;
+    cout << "4. Graf planar dan rumus Euler" << endl;
+    cout << "5. Pewarnaan graf Welch-Powell" << endl;
+    cout << "6. Gambar graf dengan Graphviz" << endl;
+    cout << "0. Kembali ke Main Menu" << endl;
 
     int choice = readInteger("Pilih topik: ");
     if (choice == 0)
@@ -646,29 +733,35 @@ void solveQuestion() {
       renderGraphviz();
       break;
     default:
-      cout << "Pilihan tidak tersedia.\n";
+      cout << "Pilihan tidak tersedia." << endl;
     }
 
-    cout << "\nTekan Enter untuk kembali ke menu pemecahan...";
+    cout << endl << "Tekan Enter untuk kembali ke menu pemecahan...";
     cin.get();
   }
 }
 
+// Menampilkan pilihan utama program untuk materi, soal, solver, dan keluar.
+// Pemrosesan pilihan pengguna dilakukan di fungsi main().
 void mainMenu() {
   printSeparator();
   cout << "     Main Menu     " << endl;
   printSeparator();
 
-  cout << "1. Lihat Definisi Materi\n";
-  cout << "2. Lihat Soal\n";
-  cout << "3. Peckahkan Soal\n";
-  cout << "4. Keluar\n";
+  cout << "1. Lihat Definisi Materi" << endl;
+  cout << "2. Lihat Soal" << endl;
+  cout << "3. Pecahkan Soal" << endl;
+  cout << "4. Keluar" << endl;
 
   cout << endl;
 }
 
-void exit() { cout << "Program berhenti. Terima kasih!\n"; }
+// Menampilkan pesan penutup saat pengguna memilih keluar dari program.
+// Fungsi ini dipanggil sekali setelah perulangan menu utama selesai.
+void exit() { cout << "Program berhenti. Terima kasih!" << endl; }
 
+// Menjalankan perulangan menu utama sampai pengguna memilih opsi keluar.
+// Fungsi mengarahkan setiap pilihan ke fitur program yang sesuai.
 int main() {
   bool systemRunning = true;
   int choice = 0;
@@ -679,7 +772,7 @@ int main() {
     cout << "Pilih menu (1-4): ";
 
     if (!(cin >> choice)) {
-      cout << "Input harus berupa angka.\n";
+      cout << "Input harus berupa angka." << endl;
       cin.clear();
       cin.ignore(1000, '\n');
       continue;
@@ -701,10 +794,10 @@ int main() {
       systemRunning = false;
       continue;
     default:
-      cout << "Pilihan tidak tersedia.\n";
+      cout << "Pilihan tidak tersedia." << endl;
     }
 
-    cout << "\nTekan Enter untuk kembali ke menu...";
+    cout << endl << "Tekan Enter untuk kembali ke menu...";
     cin.get();
   }
 
