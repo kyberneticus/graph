@@ -22,35 +22,42 @@ struct Question {
 
 const Question questions[] = {
     {1, "Graf Teratur",
-     "Tentukan apakah graf teratur dengan n simpul dan derajat r dapat "
-     "dibuat.",
+     "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
      nullptr},
     {2, "Graf Berderajat Sama",
-     "Tentukan jumlah simpul graf berderajat sama dari jumlah sisi dan "
-     "derajat setiap simpul.",
+     "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
+     "derajat setiap simpul?",
      nullptr},
     {3, "Euler dan Hamilton",
-     "Masukkan adjacency matrix graf, lalu periksa apakah graf tersebut "
-     "Euler dan Hamiltonian.",
+     "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler "
+     "dan Hamiltonian?",
      "questions/question-3.jpeg"},
     {4, "DFS dan BFS",
-     "Masukkan adjacency matrix graf dan simpul awal, lalu telusuri graf "
-     "dengan DFS dan BFS.",
+     "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
+     "dengan DFS dan BFS?",
      "questions/question-3.jpeg"},
 };
 
 const int questionCount = sizeof(questions) / sizeof(questions[0]);
 
-const string BORDER(52, '=');
+const string BORDER(42, '=');
+const string DIVIDER(42, '-');
 
 void printSection(const string &title) {
-  cout << '\n' << BORDER << "\n  " << title << "\n" << BORDER << endl;
+  cout << '\n' << title << "\n" << BORDER << endl;
 }
 
-void printHeader() { printSection("GRAPH"); }
+void printHeader(const Question *pinnedQuestion) {
+  cout << '\n' << BORDER << "\n               GRAPH SOLVER\n" << BORDER
+       << "\n\nSoal aktif : ";
+  if (pinnedQuestion == nullptr)
+    cout << "Belum dipilih" << endl;
+  else
+    cout << pinnedQuestion->number << ". " << pinnedQuestion->title << endl;
+}
 
 void waitForEnter(const string &destination) {
-  cout << "\n[ Tekan Enter untuk " << destination << " ]";
+  cout << "\n" << DIVIDER << "\n[ Tekan Enter untuk " << destination << " ]";
   cin.get();
   cout << endl;
 }
@@ -101,8 +108,8 @@ const Question *findQuestion(int number) {
 }
 
 void showQuestionDetails(const Question &question) {
-  printSection("SOAL " + to_string(question.number));
-  cout << question.title << "\n\n" << question.text << endl;
+  printSection("SOAL " + to_string(question.number) + " - " + question.title);
+  cout << '\n' << question.text << endl;
   showReferenceImage(question);
 }
 
@@ -111,9 +118,10 @@ void showQuestion(const Question *&pinnedQuestion) {
     printSection("DAFTAR SOAL");
     for (const Question &question : questions)
       cout << "  " << question.number << ". " << question.title << endl;
-    cout << "  0. Kembali ke Main Menu" << endl;
+    cout << "\n  0. Kembali" << endl;
+    cout << DIVIDER << endl;
 
-    int selectedNumber = readInteger("\nPilih nomor soal [0-4]: ");
+    int selectedNumber = readInteger("Pilih soal [0-4]: ");
     if (selectedNumber == 0)
       return;
 
@@ -124,7 +132,8 @@ void showQuestion(const Question *&pinnedQuestion) {
     }
 
     pinnedQuestion = selectedQuestion;
-    cout << "Soal " << pinnedQuestion->number << " berhasil dipilih!" << endl;
+    cout << "[OK] Soal " << pinnedQuestion->number << " berhasil dipilih."
+         << endl;
     showQuestionDetails(*pinnedQuestion);
     return;
   }
@@ -477,9 +486,10 @@ void solveQuestion() {
     printSection("PECAHKAN SOAL");
     for (const Question &question : questions)
       cout << "  " << question.number << ". " << question.title << endl;
-    cout << "  0. Kembali ke Main Menu" << endl;
+    cout << "\n  0. Kembali" << endl;
+    cout << DIVIDER << endl;
 
-    int number = readInteger("\nPilih solver [0-4]: ");
+    int number = readInteger("Pilih solver [0-4]: ");
     if (number == 0)
       return;
 
@@ -511,10 +521,11 @@ void solveQuestion() {
 }
 
 void mainMenu() {
-  printSection("MAIN MENU");
+  cout << "\nMAIN MENU\n" << DIVIDER << endl;
   cout << "  1. Lihat Soal" << endl;
   cout << "  2. Pecahkan Soal" << endl;
   cout << "  3. Keluar" << endl;
+  cout << DIVIDER << endl;
 }
 
 int main() {
@@ -522,7 +533,7 @@ int main() {
   verifyAlgorithms();
 
   while (true) {
-    printHeader();
+    printHeader(pinnedQuestion);
     mainMenu();
     int choice = readInteger("Pilih menu [1-3]: ");
 
