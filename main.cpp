@@ -4,26 +4,13 @@
 #include <string>
 using namespace std;
 
-const int QUESTION_GRAPH_VERTICES = 6;
+const int MAX_VERTICES = 10;
 
-// Matriks ketetanggaan graf pada Soal 3 dan Soal 4.
-const int questionGraph[QUESTION_GRAPH_VERTICES][QUESTION_GRAPH_VERTICES] = {
-    {0, 1, 1, 1, 1, 1},
-    {1, 0, 1, 1, 1, 1},
-    {1, 1, 0, 1, 0, 1},
-    {1, 1, 1, 0, 0, 1},
-    {1, 1, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 0},
+struct Graph {
+  bool directed;
+  int vertexCount;
+  int adjacency[MAX_VERTICES][MAX_VERTICES];
 };
-
-void printSeparator() { cout << "===================" << endl; }
-
-void printHeader() {
-  printSeparator();
-  cout << "       Graph       " << endl;
-  printSeparator();
-  cout << endl;
-}
 
 struct Question {
   int number;
@@ -33,80 +20,37 @@ struct Question {
 };
 
 const Question questions[] = {
-    {1, "Graf teratur berderajat 3",
-     "Apakah memungkinkan untuk sebuah graf teratur berderajat 3 memiliki 7 "
-     "simpul?",
+    {1, "Graf Teratur",
+     "Tentukan apakah graf teratur dengan n simpul dan derajat r dapat "
+     "dibuat.",
      nullptr},
-    {2, "Graf sederhana berderajat 2",
-     "Tentukan jumlah simpul pada graf sederhana bila memiliki 13 sisi dan "
-     "setiap simpul berderajat 2.",
+    {2, "Graf Berderajat Sama",
+     "Tentukan jumlah simpul graf berderajat sama dari jumlah sisi dan "
+     "derajat setiap simpul.",
      nullptr},
-    {3, "Graf Euler dan Hamilton",
-     "Tentukan apakah graf di atas merupakan graf Euler dan tentukan juga "
-     "apakah graf tersebut merupakan graf Hamiltonian!",
+    {3, "Euler dan Hamilton",
+     "Masukkan adjacency matrix graf, lalu periksa apakah graf tersebut "
+     "Euler dan Hamiltonian.",
      "questions/question-3.jpeg"},
     {4, "DFS dan BFS",
-     "Telusuri graf pada Soal 3 dengan menggunakan DFS dan BFS.",
+     "Masukkan adjacency matrix graf dan simpul awal, lalu telusuri graf "
+     "dengan DFS dan BFS.",
      "questions/question-3.jpeg"},
 };
 
 const int questionCount = sizeof(questions) / sizeof(questions[0]);
 
-void showQuestionDetails(const Question &question) {
-  cout << endl << "======================= SOAL " << question.number
-       << " =======================" << endl;
-  cout << question.title << endl << endl;
-  cout << question.text << endl;
-
-  if (question.imagePath != nullptr) {
-    cout << endl << "Gambar graf:" << endl;
-    string command = "chafa --size=45x14 " + string(question.imagePath);
-    if (system(command.c_str()) != 0)
-      cout << "Gambar tidak dapat ditampilkan. Install Chafa dengan: sudo apt "
-              "install chafa"
-           << endl;
-  }
+void printSection(const string &title) {
+  cout << endl << "============== " << title << " ==============" << endl;
 }
 
-void showQuestion(const Question *&pinnedQuestion) {
-  while (true) {
-    cout << "===================== DAFTAR SOAL =====================" << endl
-         << endl;
-    for (const Question &question : questions)
-      cout << question.number << ". " << question.title << endl;
+void printSeparator() { cout << "===================" << endl; }
 
-    cout << "0. Kembali ke Main Menu" << endl << endl;
-    cout << "Pilih nomor soal: ";
-
-    int selectedNumber;
-    if (!(cin >> selectedNumber)) {
-      cout << "Input harus berupa angka." << endl << endl;
-      cin.clear();
-      cin.ignore(1000, '\n');
-      continue;
-    }
-    cin.ignore(1000, '\n');
-
-    if (selectedNumber == 0)
-      return;
-
-    const Question *selectedQuestion = nullptr;
-    for (const Question &question : questions) {
-      if (question.number == selectedNumber) {
-        selectedQuestion = &question;
-        break;
-      }
-    }
-
-    if (selectedQuestion == nullptr) {
-      cout << "Nomor soal tidak tersedia." << endl << endl;
-      continue;
-    }
-
-    pinnedQuestion = selectedQuestion;
-    showQuestionDetails(*pinnedQuestion);
-    return;
-  }
+void printHeader() {
+  printSeparator();
+  cout << "       Graph       " << endl;
+  printSeparator();
+  cout << endl;
 }
 
 int readInteger(const string &prompt) {
@@ -124,35 +68,154 @@ int readInteger(const string &prompt) {
   }
 }
 
-void graphDegrees(const int graph[QUESTION_GRAPH_VERTICES]
-                                [QUESTION_GRAPH_VERTICES],
-                  int degrees[QUESTION_GRAPH_VERTICES]) {
-  for (int vertex = 0; vertex < QUESTION_GRAPH_VERTICES; ++vertex) {
-    degrees[vertex] = 0;
-    for (int neighbor = 0; neighbor < QUESTION_GRAPH_VERTICES; ++neighbor)
-      degrees[vertex] += graph[vertex][neighbor];
+int readNonNegativeInteger(const string &prompt) {
+  int value;
+  do {
+    value = readInteger(prompt);
+    if (value < 0)
+      cout << "Masukkan bilangan tidak negatif." << endl;
+  } while (value < 0);
+  return value;
+}
+
+void showReferenceImage(const Question &question) {
+  if (question.imagePath == nullptr)
+    return;
+
+  cout << endl << "Gambar referensi:" << endl;
+  string command = "chafa --size=45x14 " + string(question.imagePath);
+  if (system(command.c_str()) != 0)
+    cout << "Gambar tidak dapat ditampilkan. Install Chafa dengan: sudo apt "
+            "install chafa"
+         << endl;
+}
+
+const Question *findQuestion(int number) {
+  for (const Question &question : questions) {
+    if (question.number == number)
+      return &question;
+  }
+  return nullptr;
+}
+
+void showQuestionDetails(const Question &question) {
+  cout << endl << "======================= SOAL " << question.number
+       << " =======================" << endl;
+  cout << question.title << endl << endl;
+  cout << question.text << endl;
+  showReferenceImage(question);
+}
+
+void showQuestion(const Question *&pinnedQuestion) {
+  while (true) {
+    cout << "===================== DAFTAR SOAL =====================" << endl
+         << endl;
+    for (const Question &question : questions)
+      cout << question.number << ". " << question.title << endl;
+    cout << "0. Kembali ke Main Menu" << endl << endl;
+
+    int selectedNumber = readInteger("Pilih nomor soal: ");
+    if (selectedNumber == 0)
+      return;
+
+    const Question *selectedQuestion = findQuestion(selectedNumber);
+    if (selectedQuestion == nullptr) {
+      cout << "Nomor soal tidak tersedia." << endl << endl;
+      continue;
+    }
+
+    pinnedQuestion = selectedQuestion;
+    cout << "Soal " << pinnedQuestion->number << " berhasil dipilih!" << endl;
+    showQuestionDetails(*pinnedQuestion);
+    return;
   }
 }
 
-void depthFirstSearch(const int graph[QUESTION_GRAPH_VERTICES]
-                                    [QUESTION_GRAPH_VERTICES],
-                      int vertex, bool visited[QUESTION_GRAPH_VERTICES],
-                      int order[QUESTION_GRAPH_VERTICES], int &orderSize) {
+void readGraph(Graph &graph) {
+  int type;
+  do {
+    cout << "1. Graf tak berarah" << endl;
+    cout << "2. Graf berarah" << endl;
+    type = readInteger("Jenis graf: ");
+    if (type != 1 && type != 2)
+      cout << "Pilih 1 atau 2." << endl;
+  } while (type != 1 && type != 2);
+
+  graph.directed = type == 2;
+  do {
+    graph.vertexCount = readInteger("Jumlah simpul (1-10): ");
+    if (graph.vertexCount < 1 || graph.vertexCount > MAX_VERTICES)
+      cout << "Jumlah simpul harus antara 1 sampai 10." << endl;
+  } while (graph.vertexCount < 1 || graph.vertexCount > MAX_VERTICES);
+
+  cout << "Masukkan jumlah sisi dari setiap simpul baris ke simpul kolom."
+       << endl;
+  cout << "Nilai diagonal adalah jumlah loop; sisi ganda diperbolehkan."
+       << endl;
+
+  while (true) {
+    for (int from = 0; from < graph.vertexCount; ++from) {
+      for (int to = 0; to < graph.vertexCount; ++to) {
+        graph.adjacency[from][to] = readNonNegativeInteger(
+            "M[" + to_string(from + 1) + "][" + to_string(to + 1) + "]: ");
+      }
+    }
+
+    if (graph.directed)
+      return;
+
+    bool symmetric = true;
+    for (int from = 0; from < graph.vertexCount; ++from) {
+      for (int to = from + 1; to < graph.vertexCount; ++to) {
+        if (graph.adjacency[from][to] != graph.adjacency[to][from])
+          symmetric = false;
+      }
+    }
+
+    if (symmetric)
+      return;
+
+    cout << "Untuk graf tak berarah, matrix harus simetris. Masukkan ulang "
+            "matrix."
+         << endl;
+  }
+}
+
+void printMatrix(const Graph &graph) {
+  cout << "\nAdjacency matrix:" << endl << "    ";
+  for (int vertex = 0; vertex < graph.vertexCount; ++vertex)
+    cout << vertex + 1 << " ";
+  cout << endl;
+
+  for (int from = 0; from < graph.vertexCount; ++from) {
+    cout << from + 1 << " | ";
+    for (int to = 0; to < graph.vertexCount; ++to)
+      cout << graph.adjacency[from][to] << " ";
+    cout << endl;
+  }
+}
+
+bool hasEdge(const Graph &graph, int from, int to, bool reverse = false) {
+  return reverse ? graph.adjacency[to][from] != 0
+                 : graph.adjacency[from][to] != 0;
+}
+
+void depthFirstSearch(const Graph &graph, int vertex,
+                      bool visited[MAX_VERTICES], int order[MAX_VERTICES],
+                      int &orderSize, bool reverse = false) {
   visited[vertex] = true;
   order[orderSize++] = vertex;
 
-  for (int neighbor = 0; neighbor < QUESTION_GRAPH_VERTICES; ++neighbor) {
-    if (graph[vertex][neighbor] != 0 && !visited[neighbor])
-      depthFirstSearch(graph, neighbor, visited, order, orderSize);
+  for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
+    if (hasEdge(graph, vertex, neighbor, reverse) && !visited[neighbor])
+      depthFirstSearch(graph, neighbor, visited, order, orderSize, reverse);
   }
 }
 
-void breadthFirstSearch(const int graph[QUESTION_GRAPH_VERTICES]
-                                      [QUESTION_GRAPH_VERTICES],
-                        int start, int order[QUESTION_GRAPH_VERTICES],
+void breadthFirstSearch(const Graph &graph, int start, int order[MAX_VERTICES],
                         int &orderSize) {
-  bool visited[QUESTION_GRAPH_VERTICES] = {};
-  int queue[QUESTION_GRAPH_VERTICES];
+  bool visited[MAX_VERTICES] = {};
+  int queue[MAX_VERTICES];
   int front = 0;
   int back = 0;
   queue[back++] = start;
@@ -162,8 +225,8 @@ void breadthFirstSearch(const int graph[QUESTION_GRAPH_VERTICES]
     int vertex = queue[front++];
     order[orderSize++] = vertex;
 
-    for (int neighbor = 0; neighbor < QUESTION_GRAPH_VERTICES; ++neighbor) {
-      if (graph[vertex][neighbor] != 0 && !visited[neighbor]) {
+    for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
+      if (hasEdge(graph, vertex, neighbor) && !visited[neighbor]) {
         visited[neighbor] = true;
         queue[back++] = neighbor;
       }
@@ -171,24 +234,61 @@ void breadthFirstSearch(const int graph[QUESTION_GRAPH_VERTICES]
   }
 }
 
-bool isConnected(const int graph[QUESTION_GRAPH_VERTICES]
-                               [QUESTION_GRAPH_VERTICES]) {
-  bool visited[QUESTION_GRAPH_VERTICES] = {};
-  int order[QUESTION_GRAPH_VERTICES];
-  int orderSize = 0;
-  depthFirstSearch(graph, 0, visited, order, orderSize);
-  return orderSize == QUESTION_GRAPH_VERTICES;
+bool visitsAllNonIsolatedVertices(const Graph &graph,
+                                  bool visited[MAX_VERTICES]) {
+  for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
+    bool hasIncidentEdge = false;
+    for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
+      hasIncidentEdge = hasIncidentEdge ||
+                        graph.adjacency[vertex][neighbor] != 0 ||
+                        graph.adjacency[neighbor][vertex] != 0;
+    }
+    if (hasIncidentEdge && !visited[vertex])
+      return false;
+  }
+  return true;
 }
 
-bool findHamiltonianCycle(const int graph[QUESTION_GRAPH_VERTICES]
-                                        [QUESTION_GRAPH_VERTICES],
-                          int vertex, bool visited[QUESTION_GRAPH_VERTICES],
-                          int path[QUESTION_GRAPH_VERTICES], int pathSize) {
-  if (pathSize == QUESTION_GRAPH_VERTICES)
-    return graph[vertex][path[0]] != 0;
+bool isEulerConnected(const Graph &graph) {
+  int start = -1;
+  for (int vertex = 0; vertex < graph.vertexCount && start == -1; ++vertex) {
+    for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
+      if (graph.adjacency[vertex][neighbor] != 0 ||
+          graph.adjacency[neighbor][vertex] != 0) {
+        start = vertex;
+        break;
+      }
+    }
+  }
 
-  for (int neighbor = 0; neighbor < QUESTION_GRAPH_VERTICES; ++neighbor) {
-    if (graph[vertex][neighbor] != 0 && !visited[neighbor]) {
+  if (start == -1)
+    return true;
+
+  bool visited[MAX_VERTICES] = {};
+  int order[MAX_VERTICES];
+  int orderSize = 0;
+  depthFirstSearch(graph, start, visited, order, orderSize);
+  if (!visitsAllNonIsolatedVertices(graph, visited))
+    return false;
+
+  if (!graph.directed)
+    return true;
+
+  for (int vertex = 0; vertex < graph.vertexCount; ++vertex)
+    visited[vertex] = false;
+  orderSize = 0;
+  depthFirstSearch(graph, start, visited, order, orderSize, true);
+  return visitsAllNonIsolatedVertices(graph, visited);
+}
+
+bool findHamiltonianCycle(const Graph &graph, int vertex,
+                          bool visited[MAX_VERTICES], int path[MAX_VERTICES],
+                          int pathSize) {
+  if (pathSize == graph.vertexCount)
+    return hasEdge(graph, vertex, path[0]);
+
+  for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
+    if (hasEdge(graph, vertex, neighbor) && !visited[neighbor]) {
       visited[neighbor] = true;
       path[pathSize] = neighbor;
       if (findHamiltonianCycle(graph, neighbor, visited, path, pathSize + 1))
@@ -199,7 +299,7 @@ bool findHamiltonianCycle(const int graph[QUESTION_GRAPH_VERTICES]
   return false;
 }
 
-void printPath(const int path[QUESTION_GRAPH_VERTICES], int pathSize,
+void printPath(const int path[MAX_VERTICES], int pathSize,
                bool closesCycle = false) {
   for (int index = 0; index < pathSize; ++index) {
     cout << path[index] + 1;
@@ -212,135 +312,199 @@ void printPath(const int path[QUESTION_GRAPH_VERTICES], int pathSize,
 }
 
 void solveRegularGraph() {
-  const int vertexCount = 7;
-  const int degree = 3;
+  const int vertexCount = readNonNegativeInteger("Jumlah simpul (n): ");
+  const int degree = readNonNegativeInteger("Derajat (r)      : ");
   const int degreeSum = vertexCount * degree;
 
-  cout << "Jumlah derajat = " << vertexCount << " x " << degree << " = "
-       << degreeSum << "." << endl;
-  cout << "Jumlah derajat graf harus genap, jadi graf " << degree
-       << "-teratur dengan " << vertexCount << " simpul tidak mungkin dibuat."
-       << endl;
+  printSection("PENYELESAIAN");
+  cout << "Jumlah derajat = n × r" << endl;
+  cout << "               = " << vertexCount << " × " << degree << endl;
+  cout << "               = " << degreeSum << endl << endl;
+  if (degreeSum % 2 != 0)
+    cout << "Karena jumlah derajat ganjil, graf tersebut tidak mungkin dibuat."
+         << endl;
+  else
+    cout << "Jumlah derajat genap; syarat paritas terpenuhi." << endl;
 }
 
 void solveDegreeTwoGraph() {
-  const int edgeCount = 13;
-  const int degree = 2;
-  const int degreeSum = 2 * edgeCount;
-  const int vertexCount = degreeSum / degree;
+  const int edgeCount = readNonNegativeInteger("Jumlah sisi (e): ");
+  int degree;
+  do {
+    degree = readNonNegativeInteger("Derajat (r)    : ");
+    if (degree == 0)
+      cout << "Derajat harus lebih dari 0." << endl;
+  } while (degree == 0);
 
-  cout << "Jumlah derajat = 2e = 2 x " << edgeCount << " = " << degreeSum
-       << "." << endl;
-  cout << "Karena setiap simpul berderajat " << degree << ", jumlah simpul = "
-       << degreeSum << " / " << degree << " = " << vertexCount << "." << endl;
+  const int degreeSum = 2 * edgeCount;
+  printSection("PENYELESAIAN");
+  cout << "Jumlah derajat = 2e" << endl;
+  cout << "               = 2 x " << edgeCount << endl;
+  cout << "               = " << degreeSum << endl << endl;
+
+  if (degreeSum % degree != 0) {
+    cout << "Jumlah simpul = " << degreeSum << " / " << degree
+         << " bukan bilangan bulat, jadi graf berderajat sama tidak mungkin "
+            "dibuat."
+         << endl;
+    return;
+  }
+
+  cout << "Jumlah simpul = 2e / r" << endl;
+  cout << "               = " << degreeSum << " / " << degree << endl;
+  cout << "               = " << degreeSum / degree << endl;
 }
 
 void solveEulerAndHamilton() {
-  int degrees[QUESTION_GRAPH_VERTICES];
-  graphDegrees(questionGraph, degrees);
+  Graph graph;
+  readGraph(graph);
+  printMatrix(graph);
 
-  cout << "Derajat simpul 1 sampai 6: ";
-  for (int vertex = 0; vertex < QUESTION_GRAPH_VERTICES; ++vertex) {
-    cout << degrees[vertex];
-    if (vertex < QUESTION_GRAPH_VERTICES - 1)
-      cout << ", ";
+  int inDegree[MAX_VERTICES] = {};
+  int outDegree[MAX_VERTICES] = {};
+  int degree[MAX_VERTICES] = {};
+  for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
+    for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
+      outDegree[vertex] += graph.adjacency[vertex][neighbor];
+      inDegree[vertex] += graph.adjacency[neighbor][vertex];
+      if (vertex == neighbor)
+        degree[vertex] += 2 * graph.adjacency[vertex][neighbor];
+      else
+        degree[vertex] += graph.adjacency[vertex][neighbor];
+    }
   }
-  cout << "." << endl;
 
-  bool isEulerGraph = isConnected(questionGraph);
-  for (int degree : degrees)
-    isEulerGraph = isEulerGraph && degree % 2 == 0;
+  printSection("PENYELESAIAN");
+  bool isEulerGraph = isEulerConnected(graph);
+  if (graph.directed) {
+    cout << "Derajat masuk dan keluar:" << endl;
+    for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
+      cout << "Simpul " << vertex + 1 << ": masuk = " << inDegree[vertex]
+           << ", keluar = " << outDegree[vertex] << endl;
+      isEulerGraph = isEulerGraph && inDegree[vertex] == outDegree[vertex];
+    }
+  } else {
+    cout << "Derajat simpul:" << endl;
+    for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
+      cout << "Simpul " << vertex + 1 << ": " << degree[vertex] << endl;
+      isEulerGraph = isEulerGraph && degree[vertex] % 2 == 0;
+    }
+  }
 
+  cout << endl;
   if (isEulerGraph)
     cout << "Graf adalah graf Euler." << endl;
   else
-    cout << "Graf bukan graf Euler karena tidak semua derajat simpul genap."
-         << endl;
+    cout << "Graf bukan graf Euler." << endl;
 
-  bool visited[QUESTION_GRAPH_VERTICES] = {};
-  int cycle[QUESTION_GRAPH_VERTICES] = {0};
+  bool visited[MAX_VERTICES] = {};
+  int cycle[MAX_VERTICES] = {};
   visited[0] = true;
-  if (findHamiltonianCycle(questionGraph, 0, visited, cycle, 1)) {
+  if (findHamiltonianCycle(graph, 0, visited, cycle, 1)) {
     cout << "Graf Hamiltonian: ";
-    printPath(cycle, QUESTION_GRAPH_VERTICES, true);
+    printPath(cycle, graph.vertexCount, true);
   } else {
     cout << "Graf bukan graf Hamiltonian." << endl;
   }
 }
 
 void solveDfsAndBfs() {
-  const int start = 0;
-  int dfsOrder[QUESTION_GRAPH_VERTICES];
-  int bfsOrder[QUESTION_GRAPH_VERTICES];
+  Graph graph;
+  readGraph(graph);
+  printMatrix(graph);
+
+  int start;
+  do {
+    start =
+        readInteger("Simpul awal (1-" + to_string(graph.vertexCount) + "): ");
+    if (start < 1 || start > graph.vertexCount)
+      cout << "Simpul awal tidak tersedia." << endl;
+  } while (start < 1 || start > graph.vertexCount);
+  --start;
+
+  int dfsOrder[MAX_VERTICES];
+  int bfsOrder[MAX_VERTICES];
   int dfsSize = 0;
   int bfsSize = 0;
-  bool visited[QUESTION_GRAPH_VERTICES] = {};
+  bool visited[MAX_VERTICES] = {};
+  depthFirstSearch(graph, start, visited, dfsOrder, dfsSize);
+  breadthFirstSearch(graph, start, bfsOrder, bfsSize);
 
-  depthFirstSearch(questionGraph, start, visited, dfsOrder, dfsSize);
-  breadthFirstSearch(questionGraph, start, bfsOrder, bfsSize);
-
-  cout << "Mulai dari simpul " << start + 1
-       << " dan memilih tetangga bernomor terkecil terlebih dahulu:" << endl;
+  printSection("PENYELESAIAN");
   cout << "DFS: ";
   printPath(dfsOrder, dfsSize);
   cout << "BFS: ";
   printPath(bfsOrder, bfsSize);
 }
 
-void verifyQuestionGraph() {
-  int degrees[QUESTION_GRAPH_VERTICES];
-  int dfsOrder[QUESTION_GRAPH_VERTICES];
-  int bfsOrder[QUESTION_GRAPH_VERTICES];
-  int cycle[QUESTION_GRAPH_VERTICES] = {0};
-  int dfsSize = 0;
-  int bfsSize = 0;
-  bool visited[QUESTION_GRAPH_VERTICES] = {};
-  const int expectedDegrees[] = {5, 5, 4, 4, 3, 5};
+void verifyAlgorithms() {
+  Graph graph = {false,
+                 6,
+                 {{0, 1, 1, 1, 1, 1},
+                  {1, 0, 1, 1, 1, 1},
+                  {1, 1, 0, 1, 0, 1},
+                  {1, 1, 1, 0, 0, 1},
+                  {1, 1, 0, 0, 0, 1},
+                  {1, 1, 1, 1, 1, 0}}};
   const int expectedDfs[] = {0, 1, 2, 3, 5, 4};
   const int expectedBfs[] = {0, 1, 2, 3, 4, 5};
+  bool visited[MAX_VERTICES] = {};
+  int dfsOrder[MAX_VERTICES];
+  int bfsOrder[MAX_VERTICES];
+  int cycle[MAX_VERTICES] = {};
+  int dfsSize = 0;
+  int bfsSize = 0;
 
-  graphDegrees(questionGraph, degrees);
-  depthFirstSearch(questionGraph, 0, visited, dfsOrder, dfsSize);
-  breadthFirstSearch(questionGraph, 0, bfsOrder, bfsSize);
-
-  for (int vertex = 0; vertex < QUESTION_GRAPH_VERTICES; ++vertex) {
-    assert(degrees[vertex] == expectedDegrees[vertex]);
+  depthFirstSearch(graph, 0, visited, dfsOrder, dfsSize);
+  breadthFirstSearch(graph, 0, bfsOrder, bfsSize);
+  for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
     assert(dfsOrder[vertex] == expectedDfs[vertex]);
     assert(bfsOrder[vertex] == expectedBfs[vertex]);
   }
 
-  bool cycleVisited[QUESTION_GRAPH_VERTICES] = {};
+  bool cycleVisited[MAX_VERTICES] = {};
   cycleVisited[0] = true;
-  assert(findHamiltonianCycle(questionGraph, 0, cycleVisited, cycle, 1));
+  assert(isEulerConnected(graph));
+  assert(findHamiltonianCycle(graph, 0, cycleVisited, cycle, 1));
 }
 
-// Menjalankan solver yang sesuai dengan soal terakhir yang dipilih.
-void solveQuestion(const Question *pinnedQuestion) {
-  if (pinnedQuestion == nullptr) {
-    cout << "Pilih soal terlebih dahulu melalui menu Lihat Soal." << endl;
-    return;
+void solveQuestion() {
+  while (true) {
+    cout << endl << "=================== PECAHKAN SOAL ====================" << endl;
+    for (const Question &question : questions)
+      cout << question.number << ". " << question.title << endl;
+    cout << "0. Kembali ke Main Menu" << endl << endl;
+
+    int number = readInteger("Pilih solver: ");
+    if (number == 0)
+      return;
+
+    const Question *question = findQuestion(number);
+    if (question == nullptr) {
+      cout << "Nomor solver tidak tersedia." << endl;
+      continue;
+    }
+
+    showQuestionDetails(*question);
+
+    switch (question->number) {
+    case 1:
+      solveRegularGraph();
+      break;
+    case 2:
+      solveDegreeTwoGraph();
+      break;
+    case 3:
+      solveEulerAndHamilton();
+      break;
+    case 4:
+      solveDfsAndBfs();
+      break;
+    }
+
+    cout << endl << "Tekan Enter untuk kembali ke daftar solver...";
+    cin.get();
   }
-
-  showQuestionDetails(*pinnedQuestion);
-  cout << endl << "=================== PECAHKAN SOAL ====================" << endl;
-
-  switch (pinnedQuestion->number) {
-  case 1:
-    solveRegularGraph();
-    break;
-  case 2:
-    solveDegreeTwoGraph();
-    break;
-  case 3:
-    solveEulerAndHamilton();
-    break;
-  case 4:
-    solveDfsAndBfs();
-    break;
-  }
-
-  cout << endl << "Tekan Enter untuk kembali ke Main Menu...";
-  cin.get();
 }
 
 void mainMenu() {
@@ -348,13 +512,13 @@ void mainMenu() {
   cout << "     Main Menu     " << endl;
   printSeparator();
   cout << "1. Lihat Soal" << endl;
-  cout << "2. Pecahkan Soal Terpilih" << endl;
+  cout << "2. Pecahkan Soal" << endl;
   cout << "3. Keluar" << endl << endl;
 }
 
 int main() {
   const Question *pinnedQuestion = nullptr;
-  verifyQuestionGraph();
+  verifyAlgorithms();
 
   while (true) {
     printHeader();
@@ -366,7 +530,7 @@ int main() {
       showQuestion(pinnedQuestion);
       break;
     case 2:
-      solveQuestion(pinnedQuestion);
+      solveQuestion();
       break;
     case 3:
       cout << "Program berhenti. Terima kasih!" << endl;

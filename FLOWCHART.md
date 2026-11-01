@@ -2,27 +2,24 @@
 
 Dokumen ini menggambarkan alur `main.cpp` saat ini.
 
-## Halaman 1 — Alur utama `main()`
+## Halaman 1 — Alur utama
 
 ```mermaid
 flowchart TD
     Start([Mulai]) --> Init{{Persiapan: pinnedQuestion = nullptr}}
     Init --> MainLoop((Ulangi menu))
-    MainLoop --> Header[/Output: tampilkan header dan Main Menu/]
-    Header --> InputChoice[/Input: pilih menu 1 sampai 3/]
-    InputChoice --> Choice{Nilai pilihan?}
+    MainLoop --> Header[/Output: header dan Main Menu/]
+    Header --> MenuInput[/Input: pilih menu 1 sampai 3/]
+    MenuInput --> Choice{Pilihan?}
 
-    Choice -- "1: Lihat Soal" --> Questions[[Subproses: showQuestion]]
+    Choice -- "1" --> Questions[[showQuestion]]
     Questions --> MainLoop
-
-    Choice -- "2: Pecahkan Soal Terpilih" --> Solver[[Subproses: solveQuestion]]
+    Choice -- "2" --> Solver[[solveQuestion]]
     Solver --> MainLoop
-
-    Choice -- "3: Keluar" --> ExitMessage[/Output: tampilkan pesan terima kasih/]
-    ExitMessage --> End([Selesai])
-
-    Choice -- "Selain 1 sampai 3" --> ChoiceError[/Output: "Pilihan tidak tersedia"/]
-    ChoiceError --> MainLoop
+    Choice -- "3" --> Exit[/Output: pesan terima kasih/]
+    Exit --> End([Selesai])
+    Choice -- "Selain 1-3" --> Error[/Output: pilihan tidak tersedia/]
+    Error --> MainLoop
 
     classDef terminator fill:#D5F5E3,stroke:#1E8449,color:#000,stroke-width:2px;
     classDef preparation fill:#E8DAEF,stroke:#7D3C98,color:#000,stroke-width:2px;
@@ -33,30 +30,28 @@ flowchart TD
 
     class Start,End terminator;
     class Init preparation;
-    class Header,InputChoice,ExitMessage,ChoiceError io;
+    class Header,MenuInput,Exit,Error io;
     class Choice decision;
     class Questions,Solver subprocess;
     class MainLoop connector;
 ```
 
-## Halaman 2 — Subproses `showQuestion()`
+## Halaman 2 — Pemilihan soal
 
 ```mermaid
 flowchart TD
-    Entry((Dipanggil oleh main)) --> List[/Output: tampilkan empat soal dan pilihan 0/]
-    List --> Input[/Input: masukkan nomor soal/]
+    Entry((Dipanggil oleh main)) --> List[/Output: tampilkan empat soal/]
+    List --> Input[/Input: masukkan nomor soal atau 0/]
     Input --> Back{Nomor = 0?}
-
     Back -- Ya --> Return((Kembali ke main))
     Back -- Tidak --> Find[Proses: cari soal pada array]
     Find --> Exists{Soal ditemukan?}
-
-    Exists -- Tidak --> Missing[/Output: "Nomor soal tidak tersedia"/]
+    Exists -- Tidak --> Missing[/Output: nomor soal tidak tersedia/]
     Missing --> List
-
-    Exists -- Ya --> Pin[Proses: simpan alamat soal sebagai pinnedQuestion]
-    Pin --> Show[/Output: tampilkan soal dan gambar bila tersedia/]
-    Show --> Return
+    Exists -- Ya --> Pin[Proses: simpan soal sebagai pinnedQuestion]
+    Pin --> Success[/Output: Soal N berhasil dipilih/]
+    Success --> Details[/Output: tampilkan detail soal dan gambar referensi/]
+    Details --> Return
 
     classDef connector fill:#FFFFFF,stroke:#555555,color:#000,stroke-width:2px;
     classDef process fill:#D6EAF8,stroke:#2874A6,color:#000,stroke-width:2px;
@@ -65,54 +60,84 @@ flowchart TD
 
     class Entry,Return connector;
     class Find,Pin process;
-    class List,Input,Missing,Show io;
+    class List,Input,Missing,Success,Details io;
     class Back,Exists decision;
 ```
 
-## Halaman 3 — Subproses `solveQuestion()`
+## Halaman 3 — Daftar solver
 
 ```mermaid
 flowchart TD
-    Entry((Dipanggil oleh main)) --> Selected{pinnedQuestion tersedia?}
-    Selected -- Tidak --> NeedQuestion[/Output: pilih soal terlebih dahulu/]
-    NeedQuestion --> Return((Kembali ke main))
+    Entry((Dipanggil oleh main)) --> SolverMenu[/Output: tampilkan semua solver/]
+    SolverMenu --> SolverInput[/Input: pilih solver atau 0/]
+    SolverInput --> Back{Pilihan = 0?}
+    Back -- Ya --> Return((Kembali ke main))
+    Back -- Tidak --> Which{Nomor solver?}
 
-    Selected -- Ya --> Show[/Output: tampilkan soal yang dipin/]
-    Show --> Which{Nomor soal?}
+    Which -- "1" --> RegularInput[/Input: n dan r/]
+    RegularInput --> RegularCalc[Proses: hitung n x r dan cek paritas]
+    RegularCalc --> RegularOutput[/Output: hasil graf teratur/]
 
-    Which -- "1" --> Regular[Proses: hitung 7 x 3 dan cek paritas]
-    Regular --> RegularResult[/Output: graf tidak mungkin/]
+    Which -- "2" --> SameDegreeInput[/Input: e dan r/]
+    SameDegreeInput --> SameDegreeCalc[Proses: hitung 2e / r]
+    SameDegreeCalc --> SameDegreeOutput[/Output: jumlah simpul atau gagal/]
 
-    Which -- "2" --> DegreeTwo[Proses: hitung 2 x 13 lalu bagi derajat 2]
-    DegreeTwo --> DegreeTwoResult[/Output: jumlah simpul = 13/]
+    Which -- "3" --> EulerInput[[Input adjacency matrix]]
+    EulerInput --> EulerCalc[Proses: hitung derajat dan cek Euler]
+    EulerCalc --> HamiltonCalc[Proses: cari sirkuit Hamilton]
+    HamiltonCalc --> EulerOutput[/Output: hasil Euler dan Hamilton/]
 
-    Which -- "3" --> Euler[Proses: hitung derajat dari adjacency matrix dan cek Euler]
-    Euler --> Hamilton[Proses: cari sirkuit Hamilton dengan backtracking]
-    Hamilton --> EulerHamiltonResult[/Output: hasil Euler dan sirkuit Hamilton/]
+    Which -- "4" --> TraversalInput[[Input adjacency matrix]]
+    TraversalInput --> StartInput[/Input: simpul awal/]
+    StartInput --> DFS[Proses: DFS]
+    DFS --> BFS[Proses: BFS]
+    BFS --> TraversalOutput[/Output: urutan DFS dan BFS/]
 
-    Which -- "4" --> DFS[Proses: telusuri adjacency matrix secara DFS dari simpul 1]
-    DFS --> BFS[Proses: telusuri adjacency matrix secara BFS dari simpul 1]
-    BFS --> TraversalResult[/Output: urutan DFS dan BFS/]
-
-    RegularResult --> Pause[/Input: tekan Enter/]
-    DegreeTwoResult --> Pause
-    EulerHamiltonResult --> Pause
-    TraversalResult --> Pause
+    RegularOutput --> Pause[/Input: tekan Enter/]
+    SameDegreeOutput --> Pause
+    EulerOutput --> Pause
+    TraversalOutput --> Pause
     Pause --> Return
 
     classDef connector fill:#FFFFFF,stroke:#555555,color:#000,stroke-width:2px;
     classDef process fill:#D6EAF8,stroke:#2874A6,color:#000,stroke-width:2px;
     classDef io fill:#FDEBD0,stroke:#CA6F1E,color:#000,stroke-width:2px;
     classDef decision fill:#F9E79F,stroke:#B7950B,color:#000,stroke-width:2px;
+    classDef subprocess fill:#D4E6F1,stroke:#2471A3,color:#000,stroke-width:2px;
 
     class Entry,Return connector;
-    class Regular,DegreeTwo,Euler,Hamilton,DFS,BFS process;
-    class NeedQuestion,Show,RegularResult,DegreeTwoResult,EulerHamiltonResult,TraversalResult,Pause io;
-    class Selected,Which decision;
+    class RegularCalc,SameDegreeCalc,EulerCalc,HamiltonCalc,DFS,BFS process;
+    class SolverMenu,SolverInput,RegularInput,RegularOutput,SameDegreeInput,SameDegreeOutput,StartInput,EulerOutput,TraversalOutput,Pause io;
+    class Back,Which decision;
+    class EulerInput,TraversalInput subprocess;
 ```
 
-## Catatan implementasi
+## Halaman 4 — Input adjacency matrix
 
-- `questionGraph` adalah adjacency matrix enam simpul yang dipakai bersama oleh Soal 3 dan 4.
-- DFS dan BFS memeriksa tetangga dalam urutan nomor simpul menaik.
-- `verifyQuestionGraph()` memakai `assert` untuk memeriksa derajat, urutan DFS/BFS, dan keberadaan sirkuit Hamilton saat program dimulai.
+```mermaid
+flowchart TD
+    Entry((Dipanggil oleh Soal 3 atau 4)) --> Type[/Input: pilih graf tak berarah atau berarah/]
+    Type --> Vertices[/Input: jumlah simpul 1 sampai 10/]
+    Vertices --> Matrix[/Input: isi semua nilai adjacency matrix/]
+    Matrix --> Directed{Graf berarah?}
+    Directed -- Ya --> Return((Kembalikan Graph))
+    Directed -- Tidak --> Symmetric{Matrix simetris?}
+    Symmetric -- Ya --> Return
+    Symmetric -- Tidak --> Error[/Output: matrix harus simetris/]
+    Error --> Matrix
+
+    classDef connector fill:#FFFFFF,stroke:#555555,color:#000,stroke-width:2px;
+    classDef io fill:#FDEBD0,stroke:#CA6F1E,color:#000,stroke-width:2px;
+    classDef decision fill:#F9E79F,stroke:#B7950B,color:#000,stroke-width:2px;
+
+    class Entry,Return connector;
+    class Type,Vertices,Matrix,Error io;
+    class Directed,Symmetric decision;
+```
+
+## Catatan
+
+- Matrix menyimpan jumlah sisi; loop adalah nilai diagonal dan sisi ganda diperbolehkan.
+- Soal 3 memeriksa sirkuit Euler. Untuk graf berarah, program memeriksa derajat masuk/keluar serta keterhubungan kuat pada simpul yang memiliki sisi.
+- Soal 4 mengikuti arah sisi pada graf berarah dan memeriksa tetangga dari nomor terkecil.
+- `verifyAlgorithms()` menjalankan `assert` untuk memeriksa DFS, BFS, keterhubungan Euler, dan Hamilton pada graf contoh enam simpul.
