@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <string>
 using namespace std;
@@ -40,16 +41,17 @@ const Question questions[] = {
 
 const int questionCount = sizeof(questions) / sizeof(questions[0]);
 
+const string BORDER(52, '=');
+
 void printSection(const string &title) {
-  cout << endl << "============== " << title << " ==============" << endl;
+  cout << '\n' << BORDER << "\n  " << title << "\n" << BORDER << endl;
 }
 
-void printSeparator() { cout << "===================" << endl; }
+void printHeader() { printSection("GRAPH"); }
 
-void printHeader() {
-  printSeparator();
-  cout << "       Graph       " << endl;
-  printSeparator();
+void waitForEnter(const string &destination) {
+  cout << "\n[ Tekan Enter untuk " << destination << " ]";
+  cin.get();
   cout << endl;
 }
 
@@ -99,22 +101,19 @@ const Question *findQuestion(int number) {
 }
 
 void showQuestionDetails(const Question &question) {
-  cout << endl << "======================= SOAL " << question.number
-       << " =======================" << endl;
-  cout << question.title << endl << endl;
-  cout << question.text << endl;
+  printSection("SOAL " + to_string(question.number));
+  cout << question.title << "\n\n" << question.text << endl;
   showReferenceImage(question);
 }
 
 void showQuestion(const Question *&pinnedQuestion) {
   while (true) {
-    cout << "===================== DAFTAR SOAL =====================" << endl
-         << endl;
+    printSection("DAFTAR SOAL");
     for (const Question &question : questions)
-      cout << question.number << ". " << question.title << endl;
-    cout << "0. Kembali ke Main Menu" << endl << endl;
+      cout << "  " << question.number << ". " << question.title << endl;
+    cout << "  0. Kembali ke Main Menu" << endl;
 
-    int selectedNumber = readInteger("Pilih nomor soal: ");
+    int selectedNumber = readInteger("\nPilih nomor soal [0-4]: ");
     if (selectedNumber == 0)
       return;
 
@@ -132,11 +131,12 @@ void showQuestion(const Question *&pinnedQuestion) {
 }
 
 void readGraph(Graph &graph) {
+  printSection("INPUT GRAF");
   int type;
   do {
-    cout << "1. Graf tak berarah" << endl;
-    cout << "2. Graf berarah" << endl;
-    type = readInteger("Jenis graf: ");
+    cout << "  1. Graf tak berarah" << endl;
+    cout << "  2. Graf berarah" << endl;
+    type = readInteger("\nPilih jenis graf [1-2]: ");
     if (type != 1 && type != 2)
       cout << "Pilih 1 atau 2." << endl;
   } while (type != 1 && type != 2);
@@ -148,16 +148,16 @@ void readGraph(Graph &graph) {
       cout << "Jumlah simpul harus antara 1 sampai 10." << endl;
   } while (graph.vertexCount < 1 || graph.vertexCount > MAX_VERTICES);
 
-  cout << "Masukkan jumlah sisi dari setiap simpul baris ke simpul kolom."
-       << endl;
-  cout << "Nilai diagonal adalah jumlah loop; sisi ganda diperbolehkan."
-       << endl;
+  printSection("ADJACENCY MATRIX");
+  cout << "Isi jumlah sisi dari simpul baris ke simpul kolom." << endl;
+  cout << "Diagonal = loop; nilai lebih dari 1 = sisi ganda." << endl;
 
   while (true) {
     for (int from = 0; from < graph.vertexCount; ++from) {
+      cout << "\nBaris " << from + 1 << ':' << endl;
       for (int to = 0; to < graph.vertexCount; ++to) {
         graph.adjacency[from][to] = readNonNegativeInteger(
-            "M[" + to_string(from + 1) + "][" + to_string(to + 1) + "]: ");
+            "  M[" + to_string(from + 1) + "][" + to_string(to + 1) + "] = ");
       }
     }
 
@@ -182,15 +182,16 @@ void readGraph(Graph &graph) {
 }
 
 void printMatrix(const Graph &graph) {
-  cout << "\nAdjacency matrix:" << endl << "    ";
+  printSection("ADJACENCY MATRIX");
+  cout << setw(5) << "";
   for (int vertex = 0; vertex < graph.vertexCount; ++vertex)
-    cout << vertex + 1 << " ";
-  cout << endl;
+    cout << setw(4) << vertex + 1;
+  cout << "\n" << string(5 + 4 * graph.vertexCount, '-') << endl;
 
   for (int from = 0; from < graph.vertexCount; ++from) {
-    cout << from + 1 << " | ";
+    cout << setw(3) << from + 1 << " |";
     for (int to = 0; to < graph.vertexCount; ++to)
-      cout << graph.adjacency[from][to] << " ";
+      cout << setw(4) << graph.adjacency[from][to];
     cout << endl;
   }
 }
@@ -312,6 +313,7 @@ void printPath(const int path[MAX_VERTICES], int pathSize,
 }
 
 void solveRegularGraph() {
+  printSection("DATA GRAF");
   const int vertexCount = readNonNegativeInteger("Jumlah simpul (n): ");
   const int degree = readNonNegativeInteger("Derajat (r)      : ");
   const int degreeSum = vertexCount * degree;
@@ -328,6 +330,7 @@ void solveRegularGraph() {
 }
 
 void solveDegreeTwoGraph() {
+  printSection("DATA GRAF");
   const int edgeCount = readNonNegativeInteger("Jumlah sisi (e): ");
   int degree;
   do {
@@ -413,10 +416,11 @@ void solveDfsAndBfs() {
   readGraph(graph);
   printMatrix(graph);
 
+  printSection("TITIK AWAL");
   int start;
   do {
     start =
-        readInteger("Simpul awal (1-" + to_string(graph.vertexCount) + "): ");
+        readInteger("Simpul awal [1-" + to_string(graph.vertexCount) + "]: ");
     if (start < 1 || start > graph.vertexCount)
       cout << "Simpul awal tidak tersedia." << endl;
   } while (start < 1 || start > graph.vertexCount);
@@ -470,12 +474,12 @@ void verifyAlgorithms() {
 
 void solveQuestion() {
   while (true) {
-    cout << endl << "=================== PECAHKAN SOAL ====================" << endl;
+    printSection("PECAHKAN SOAL");
     for (const Question &question : questions)
-      cout << question.number << ". " << question.title << endl;
-    cout << "0. Kembali ke Main Menu" << endl << endl;
+      cout << "  " << question.number << ". " << question.title << endl;
+    cout << "  0. Kembali ke Main Menu" << endl;
 
-    int number = readInteger("Pilih solver: ");
+    int number = readInteger("\nPilih solver [0-4]: ");
     if (number == 0)
       return;
 
@@ -502,18 +506,15 @@ void solveQuestion() {
       break;
     }
 
-    cout << endl << "Tekan Enter untuk kembali ke daftar solver...";
-    cin.get();
+    waitForEnter("kembali ke daftar solver");
   }
 }
 
 void mainMenu() {
-  printSeparator();
-  cout << "     Main Menu     " << endl;
-  printSeparator();
-  cout << "1. Lihat Soal" << endl;
-  cout << "2. Pecahkan Soal" << endl;
-  cout << "3. Keluar" << endl << endl;
+  printSection("MAIN MENU");
+  cout << "  1. Lihat Soal" << endl;
+  cout << "  2. Pecahkan Soal" << endl;
+  cout << "  3. Keluar" << endl;
 }
 
 int main() {
@@ -523,7 +524,7 @@ int main() {
   while (true) {
     printHeader();
     mainMenu();
-    int choice = readInteger("Pilih menu (1-3): ");
+    int choice = readInteger("Pilih menu [1-3]: ");
 
     switch (choice) {
     case 1:
