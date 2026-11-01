@@ -1,68 +1,60 @@
 # Graph
 
-Program C++ sederhana untuk mempelajari materi graf, melihat soal latihan, menjalankan beberapa pemecahan soal, dan menggambar graf dengan Graphviz.
+Program C++ untuk mempelajari empat soal graf. Pilih soal terlebih dahulu, lalu gunakan **Pecahkan Soal Terpilih** untuk menjalankan solver yang sesuai.
 
 ## Jalankan program
 
-Jalankan perintah ini dari folder proyek agar program dapat menemukan folder `questions/`:
+Jalankan dari folder proyek agar gambar soal dapat ditemukan:
 
 ```bash
 g++ -std=c++17 -Wall -Wextra -pedantic main.cpp -o main
 ./main
 ```
 
-## Instal Chafa dan Graphviz
+## Alur penggunaan
 
-- **Chafa** menampilkan gambar soal dan graf di terminal.
-- **Graphviz** membuat file `graphviz-output.dot` dan `graphviz-output.png` dari graf yang dimasukkan pada menu `3 -> 6`.
+1. Pilih **Lihat Soal**, lalu pilih salah satu dari empat soal. Soal tersebut dipin dan program kembali ke menu utama.
+2. Pilih **Pecahkan Soal Terpilih**.
+3. Program menjalankan solver untuk soal yang dipin.
+
+Jika belum memilih soal, menu solver meminta pengguna untuk memilih soal terlebih dahulu.
+
+## Solver
+
+| Soal | Solver |
+| --- | --- |
+| 1 | Menghitung jumlah derajat `7 × 3` untuk menentukan kemungkinan graf 3-teratur dengan 7 simpul. |
+| 2 | Menggunakan lemma jabat tangan untuk menghitung jumlah simpul dari 13 sisi dan derajat 2. |
+| 3 | Menghitung derajat dari matriks ketetanggaan, lalu memeriksa sifat Euler dan mencari sirkuit Hamilton. |
+| 4 | Menjalankan DFS dan BFS pada matriks ketetanggaan yang sama dengan Soal 3, mulai dari simpul 1 dan memilih tetangga bernomor terkecil terlebih dahulu. |
+
+Graf pada Soal 3 dan Soal 4 direpresentasikan sebagai adjacency matrix enam simpul di `main.cpp`.
+
+## Menampilkan gambar soal
+
+Soal 3 dan 4 memakai `questions/question-3.jpeg`. Program memakai [Chafa](https://hpjansson.org/chafa/) untuk menampilkannya di terminal. Jika Chafa tidak tersedia, soal dan solver tetap dapat digunakan.
 
 ### Fedora
 
 ```bash
-sudo dnf install chafa graphviz
+sudo dnf install chafa
 ```
 
 ### Ubuntu / Debian
 
 ```bash
 sudo apt update
-sudo apt install chafa graphviz
+sudo apt install chafa
 ```
 
 ### Arch Linux
 
 ```bash
-sudo pacman -S chafa graphviz
+sudo pacman -S chafa
 ```
 
 ### macOS
 
-Dengan [Homebrew](https://brew.sh/):
-
 ```bash
-brew install chafa graphviz
+brew install chafa
 ```
-
-### Windows
-
-Gunakan Windows Terminal dan jalankan PowerShell sebagai Administrator:
-
-```powershell
-winget install --id hpjansson.Chafa --exact
-winget install graphviz
-```
-
-Tutup dan buka kembali terminal, lalu periksa instalasi:
-
-```powershell
-chafa --version
-dot -V
-```
-
-Jika perintah `dot` belum ditemukan, tambahkan folder `bin` Graphviz ke environment variable `PATH`, lalu buka terminal baru.
-
-## Catatan
-
-- Saat Chafa tidak tersedia, program tetap dapat membuat PNG melalui Graphviz, tetapi tidak dapat menampilkannya di terminal.
-- Hasil Graphviz dibuat di folder proyek sebagai `graphviz-output.dot` dan `graphviz-output.png`.
-- Gambar soal berada di folder `questions/`.
