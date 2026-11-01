@@ -116,20 +116,16 @@ flowchart TD
     BackSolver -- Ya --> SSQReturn((Kembali ke main))
 
     BackSolver -- Tidak --> SolverChoice{Nilai pilihan solver?}
-    SolverChoice -- "1" --> Handshakes[[Subproses: solveHandshakes]]
-    SolverChoice -- "2" --> SimpleRegular[[Subproses: solveSimpleOrRegularGraph]]
-    SolverChoice -- "3" --> Euler[[Subproses: solveEuler; memakai Halaman 4]]
-    SolverChoice -- "4" --> Planar[[Subproses: solvePlanarEulerFormula]]
-    SolverChoice -- "5" --> Coloring[[Subproses: solveWelchPowell; memakai Halaman 4]]
-    SolverChoice -- "6" --> Graphviz[[Subproses: renderGraphviz; memakai Halaman 4]]
-    SolverChoice -- "Selain 1 sampai 6" --> SolverError[/Output: "Pilihan tidak tersedia"/]
+    SolverChoice -- "1" --> Regular[/Output: 7 x 3 = 21, jadi tidak mungkin/]
+    SolverChoice -- "2" --> DegreeTwo[/Output: 2n = 2 x 13, jadi n = 13/]
+    SolverChoice -- "3" --> EulerHamilton[/Output: bukan Euler; sirkuit Hamilton ditampilkan/]
+    SolverChoice -- "4" --> Traversal[/Output: DFS dan BFS dari simpul 1/]
+    SolverChoice -- "Selain 1 sampai 4" --> SolverError[/Output: "Pilihan tidak tersedia"/]
 
-    Handshakes --> SolverPause[/Input: tekan Enter/]
-    SimpleRegular --> SolverPause
-    Euler --> SolverPause
-    Planar --> SolverPause
-    Coloring --> SolverPause
-    Graphviz --> SolverPause
+    Regular --> SolverPause[/Input: tekan Enter/]
+    DegreeTwo --> SolverPause
+    EulerHamilton --> SolverPause
+    Traversal --> SolverPause
     SolverError --> SolverPause
     SolverPause --> SolverMenu
 
@@ -141,46 +137,7 @@ flowchart TD
     class SSQEntry,SSQReturn connector;
     class SolverMenu,SolverInput,SolverError,SolverPause io;
     class BackSolver,SolverChoice decision;
-    class Handshakes,SimpleRegular,Euler,Planar,Coloring,Graphviz subprocess;
-```
-
-## Halaman 4 — Subproses bersama `readUndirectedGraph()`
-
-Subproses ini dipanggil oleh solver Euler, Welch-Powell, dan Graphviz. Agar diagram utama tidak terlalu rumit, detail pembacaan matriks ketetanggaan dipisahkan di sini.
-
-```mermaid
-flowchart TD
-    RUGEntry((Dipanggil oleh solver)) --> InputVertex[/Input: masukkan jumlah simpul 1 sampai 20/]
-    InputVertex --> VertexValid{Jumlah simpul valid?}
-
-    VertexValid -- Tidak --> VertexError[/Output: "Jumlah simpul harus antara 1 sampai 20"/]
-    VertexError --> RUGFalse((Kembalikan false))
-
-    VertexValid -- Ya --> InitMatrix{{Persiapan: isi matriks dengan 0; i = 0; j = 1}}
-    InitMatrix --> MorePairs{Masih ada pasangan simpul?}
-
-    MorePairs -- Ya --> InputEdge[/Input: masukkan nilai sisi 0 atau 1/]
-    InputEdge --> EdgeValid{Nilai sisi 0 atau 1?}
-    EdgeValid -- Tidak --> EdgeError[/Output: "Masukkan hanya 0 atau 1"/]
-    EdgeError --> InputEdge
-
-    EdgeValid -- Ya --> SaveEdge[Proses: simpan nilai sisi secara simetris]
-    SaveEdge --> NextPair[Proses: lanjutkan ke pasangan simpul berikutnya]
-    NextPair --> MorePairs
-
-    MorePairs -- Tidak --> RUGTrue((Kembalikan true))
-
-    classDef connector fill:#FFFFFF,stroke:#555555,color:#000,stroke-width:2px;
-    classDef preparation fill:#E8DAEF,stroke:#7D3C98,color:#000,stroke-width:2px;
-    classDef process fill:#D6EAF8,stroke:#2874A6,color:#000,stroke-width:2px;
-    classDef io fill:#FDEBD0,stroke:#CA6F1E,color:#000,stroke-width:2px;
-    classDef decision fill:#F9E79F,stroke:#B7950B,color:#000,stroke-width:2px;
-
-    class RUGEntry,RUGFalse,RUGTrue connector;
-    class InitMatrix preparation;
-    class SaveEdge,NextPair process;
-    class InputVertex,VertexError,InputEdge,EdgeError io;
-    class VertexValid,MorePairs,EdgeValid decision;
+    class Regular,DegreeTwo,EulerHamilton,Traversal io;
 ```
 
 ## Shape convention
