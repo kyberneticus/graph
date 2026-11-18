@@ -225,36 +225,74 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
 int main() {
   const char *solvers[] = {"Graf Teratur", "Graf Berderajat Sama",
                            "Euler dan Hamilton", "DFS dan BFS"};
-  string soal;
+  string soalText[] = {
+      "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
+      "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
+      "derajat setiap simpul?",
+      "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler "
+      "dan Hamiltonian?",
+      "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
+      "dengan DFS dan BFS?",
+  };
+  int soalAktif = 0;
 
   while (true) {
-    // ---------- INPUT SOAL (paste, boleh banyak baris) ----------
-    cout << "\nINPUT SOAL\n" << BORDER << endl;
-    cout << "Paste soal, akhiri dengan baris kosong:" << endl;
+    // ---------- INPUT SOAL -> lihatSoal(soalAktif) ----------
+    while (true) {
+      cout << "\nDAFTAR SOAL\n" << BORDER << endl;
+      for (int i = 0; i < 4; i++)
+        cout << "  " << i + 1 << ". " << solvers[i] << endl;
+      cout << "\n  0. Kembali" << endl << DIVIDER << endl;
+      cout << "Pilih soal [0-4]: ";
 
-    string soalBaru, line;
-    while (getline(cin, line)) {
-      if (line.find_first_not_of(" \t") == string::npos)
+      int pilihan;
+      if (!(cin >> pilihan)) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Input harus berupa angka." << endl;
+        continue;
+      }
+      cin.ignore(1000, '\n');
+
+      if (pilihan == 0)
         break;
-      soalBaru += (soalBaru.empty() ? "" : "\n") + line;
-    }
+      if (pilihan < 1 || pilihan > 4) {
+        cout << "Nomor soal tidak tersedia" << endl;
+        continue;
+      }
 
-    if (!soalBaru.empty())
-      soal = soalBaru;
-    if (soal.empty()) {
-      cout << "Soal masih kosong, coba lagi." << endl;
-      continue;
+      soalAktif = pilihan;
+      cout << "\nPaste teks soal baru (Enter kosong = pakai teks yang ada):"
+           << endl;
+
+      string teks, line;
+      while (getline(cin, line)) {
+        if (line.find_first_not_of(" \t") == string::npos)
+          break;
+        teks += (teks.empty() ? "" : "\n") + line;
+      }
+      if (!teks.empty())
+        soalText[soalAktif - 1] = teks;
+
+      cout << "\nSOAL " << soalAktif << " - " << solvers[soalAktif - 1] << "\n"
+           << BORDER << "\n\n"
+           << soalText[soalAktif - 1] << endl;
+      break;
     }
 
     // ---------- MAIN MENU ----------
     bool pilihSoalLain = false;
     while (!pilihSoalLain) {
       cout << "\nMAIN MENU\n" << DIVIDER << endl;
-      cout << "Soal aktif : " << soal.substr(0, soal.find('\n')) << endl;
+      if (soalAktif == 0)
+        cout << "Soal aktif : Belum dipilih" << endl;
+      else
+        cout << "Soal aktif : " << soalAktif << ". " << solvers[soalAktif - 1]
+             << endl;
       cout << DIVIDER << endl;
       cout << "  1. Pecahkan Soal" << endl;
       cout << "  2. Lihat Soal" << endl;
-      cout << "  3. Paste Soal Lain" << endl;
+      cout << "  3. Pilih Soal Lain" << endl;
       cout << "  4. Keluar" << endl;
       cout << DIVIDER << endl << "Input choice: ";
 
@@ -272,7 +310,11 @@ int main() {
         return 0;
       }
       if (choice == 2) {
-        cout << "\nSOAL AKTIF\n" << BORDER << "\n\n" << soal << endl;
+        if (soalAktif == 0)
+          cout << "Soal aktif belum dipilih" << endl;
+        else
+          cout << "\nSOAL AKTIF\n" << BORDER << "\n\n"
+               << soalText[soalAktif - 1] << endl;
         continue;
       }
       if (choice == 3) {
