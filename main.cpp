@@ -1,554 +1,471 @@
-#include <cassert>
-#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <string>
 using namespace std;
 
 const int MAX_VERTICES = 10;
-
-struct Graph {
-  bool directed;
-  int vertexCount;
-  int adjacency[MAX_VERTICES][MAX_VERTICES];
-};
-
-struct Question {
-  int number;
-  const char *title;
-  const char *text;
-  const char *imagePath;
-};
-
-const Question questions[] = {
-    {1, "Graf Teratur",
-     "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
-     nullptr},
-    {2, "Graf Berderajat Sama",
-     "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
-     "derajat setiap simpul?",
-     nullptr},
-    {3, "Euler dan Hamilton",
-     "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler "
-     "dan Hamiltonian?",
-     "questions/question-3.jpeg"},
-    {4, "DFS dan BFS",
-     "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
-     "dengan DFS dan BFS?",
-     "questions/question-3.jpeg"},
-};
-
-const int questionCount = sizeof(questions) / sizeof(questions[0]);
-
 const string BORDER(42, '=');
 const string DIVIDER(42, '-');
 
-void printSection(const string &title) {
-  cout << '\n' << title << "\n" << BORDER << endl;
-}
+void dfs(int u, int v, int adj[][MAX_VERTICES], bool visited[]) {
+  visited[u] = true;
+  cout << u + 1 << " ";
 
-void printHeader(const Question *pinnedQuestion) {
-  cout << '\n' << BORDER << "\n               GRAPH SOLVER\n" << BORDER
-       << "\n\nSoal aktif : ";
-  if (pinnedQuestion == nullptr)
-    cout << "Belum dipilih" << endl;
-  else
-    cout << pinnedQuestion->number << ". " << pinnedQuestion->title << endl;
-}
-
-void waitForEnter(const string &destination) {
-  cout << "\n" << DIVIDER << "\n[ Tekan Enter untuk " << destination << " ]";
-  cin.get();
-  cout << endl;
-}
-
-int readInteger(const string &prompt) {
-  int value;
-  while (true) {
-    cout << prompt;
-    if (cin >> value) {
-      cin.ignore(1000, '\n');
-      return value;
-    }
-
-    cout << "Input harus berupa angka." << endl;
-    cin.clear();
-    cin.ignore(1000, '\n');
+  for (int n = 0; n < v; ++n) {
+    if (adj[u][n] > 0 && !visited[n])
+      dfs(n, v, adj, visited);
   }
 }
 
-int readNonNegativeInteger(const string &prompt) {
-  int value;
-  do {
-    value = readInteger(prompt);
-    if (value < 0)
-      cout << "Masukkan bilangan tidak negatif." << endl;
-  } while (value < 0);
-  return value;
-}
-
-void showReferenceImage(const Question &question) {
-  if (question.imagePath == nullptr)
-    return;
-
-  cout << endl << "Gambar referensi:" << endl;
-  string command = "chafa --size=45x14 " + string(question.imagePath);
-  if (system(command.c_str()) != 0)
-    cout << "Gambar tidak dapat ditampilkan. Install Chafa dengan: sudo apt "
-            "install chafa"
-         << endl;
-}
-
-const Question *findQuestion(int number) {
-  for (const Question &question : questions) {
-    if (question.number == number)
-      return &question;
-  }
-  return nullptr;
-}
-
-void showQuestionDetails(const Question &question) {
-  printSection("SOAL " + to_string(question.number) + " - " + question.title);
-  cout << '\n' << question.text << endl;
-  showReferenceImage(question);
-}
-
-void showQuestion(const Question *&pinnedQuestion) {
-  while (true) {
-    printSection("DAFTAR SOAL");
-    for (const Question &question : questions)
-      cout << "  " << question.number << ". " << question.title << endl;
-    cout << "\n  0. Kembali" << endl;
-    cout << DIVIDER << endl;
-
-    int selectedNumber = readInteger("Pilih soal [0-4]: ");
-    if (selectedNumber == 0)
-      return;
-
-    const Question *selectedQuestion = findQuestion(selectedNumber);
-    if (selectedQuestion == nullptr) {
-      cout << "Nomor soal tidak tersedia." << endl << endl;
-      continue;
-    }
-
-    pinnedQuestion = selectedQuestion;
-    cout << "[OK] Soal " << pinnedQuestion->number << " berhasil dipilih."
-         << endl;
-    showQuestionDetails(*pinnedQuestion);
-    return;
-  }
-}
-
-void readGraph(Graph &graph) {
-  printSection("INPUT GRAF");
-  int type;
-  do {
-    cout << "  1. Graf tak berarah" << endl;
-    cout << "  2. Graf berarah" << endl;
-    type = readInteger("\nPilih jenis graf [1-2]: ");
-    if (type != 1 && type != 2)
-      cout << "Pilih 1 atau 2." << endl;
-  } while (type != 1 && type != 2);
-
-  graph.directed = type == 2;
-  do {
-    graph.vertexCount = readInteger("Jumlah simpul (1-10): ");
-    if (graph.vertexCount < 1 || graph.vertexCount > MAX_VERTICES)
-      cout << "Jumlah simpul harus antara 1 sampai 10." << endl;
-  } while (graph.vertexCount < 1 || graph.vertexCount > MAX_VERTICES);
-
-  printSection("ADJACENCY MATRIX");
-  cout << "Isi jumlah sisi dari simpul baris ke simpul kolom." << endl;
-  cout << "Diagonal = loop; nilai lebih dari 1 = sisi ganda." << endl;
-
-  while (true) {
-    for (int from = 0; from < graph.vertexCount; ++from) {
-      cout << "\nBaris " << from + 1 << ':' << endl;
-      for (int to = 0; to < graph.vertexCount; ++to) {
-        graph.adjacency[from][to] = readNonNegativeInteger(
-            "  M[" + to_string(from + 1) + "][" + to_string(to + 1) + "] = ");
-      }
-    }
-
-    if (graph.directed)
-      return;
-
-    bool symmetric = true;
-    for (int from = 0; from < graph.vertexCount; ++from) {
-      for (int to = from + 1; to < graph.vertexCount; ++to) {
-        if (graph.adjacency[from][to] != graph.adjacency[to][from])
-          symmetric = false;
-      }
-    }
-
-    if (symmetric)
-      return;
-
-    cout << "Untuk graf tak berarah, matrix harus simetris. Masukkan ulang "
-            "matrix."
-         << endl;
-  }
-}
-
-void printMatrix(const Graph &graph) {
-  printSection("ADJACENCY MATRIX");
-  cout << setw(5) << "";
-  for (int vertex = 0; vertex < graph.vertexCount; ++vertex)
-    cout << setw(4) << vertex + 1;
-  cout << "\n" << string(5 + 4 * graph.vertexCount, '-') << endl;
-
-  for (int from = 0; from < graph.vertexCount; ++from) {
-    cout << setw(3) << from + 1 << " |";
-    for (int to = 0; to < graph.vertexCount; ++to)
-      cout << setw(4) << graph.adjacency[from][to];
-    cout << endl;
-  }
-}
-
-bool hasEdge(const Graph &graph, int from, int to, bool reverse = false) {
-  return reverse ? graph.adjacency[to][from] != 0
-                 : graph.adjacency[from][to] != 0;
-}
-
-void depthFirstSearch(const Graph &graph, int vertex,
-                      bool visited[MAX_VERTICES], int order[MAX_VERTICES],
-                      int &orderSize, bool reverse = false) {
-  visited[vertex] = true;
-  order[orderSize++] = vertex;
-
-  for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
-    if (hasEdge(graph, vertex, neighbor, reverse) && !visited[neighbor])
-      depthFirstSearch(graph, neighbor, visited, order, orderSize, reverse);
-  }
-}
-
-void breadthFirstSearch(const Graph &graph, int start, int order[MAX_VERTICES],
-                        int &orderSize) {
-  bool visited[MAX_VERTICES] = {};
+void bfs(int u, int v, int adj[][MAX_VERTICES], bool visited[]) {
   int queue[MAX_VERTICES];
-  int front = 0;
-  int back = 0;
-  queue[back++] = start;
-  visited[start] = true;
+  int front = 0, back = 0;
+  visited[u] = true;
+  queue[back++] = u;
 
   while (front < back) {
-    int vertex = queue[front++];
-    order[orderSize++] = vertex;
+    int cur = queue[front++];
+    cout << cur + 1 << " ";
 
-    for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
-      if (hasEdge(graph, vertex, neighbor) && !visited[neighbor]) {
-        visited[neighbor] = true;
-        queue[back++] = neighbor;
+    for (int n = 0; n < v; ++n) {
+      if (adj[cur][n] > 0 && !visited[n]) {
+        visited[n] = true;
+        queue[back++] = n;
       }
     }
   }
 }
 
-bool visitsAllNonIsolatedVertices(const Graph &graph,
-                                  bool visited[MAX_VERTICES]) {
-  for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
-    bool hasIncidentEdge = false;
-    for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
-      hasIncidentEdge = hasIncidentEdge ||
-                        graph.adjacency[vertex][neighbor] != 0 ||
-                        graph.adjacency[neighbor][vertex] != 0;
-    }
-    if (hasIncidentEdge && !visited[vertex])
-      return false;
-  }
-  return true;
-}
+bool cariSiklus(int now, int awal, int jumlah, int v,
+                int adj[][MAX_VERTICES], bool visited[]) {
+  if (jumlah == v)
+    return adj[now][awal] > 0;
 
-bool isEulerConnected(const Graph &graph) {
-  int start = -1;
-  for (int vertex = 0; vertex < graph.vertexCount && start == -1; ++vertex) {
-    for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
-      if (graph.adjacency[vertex][neighbor] != 0 ||
-          graph.adjacency[neighbor][vertex] != 0) {
-        start = vertex;
-        break;
-      }
-    }
-  }
-
-  if (start == -1)
-    return true;
-
-  bool visited[MAX_VERTICES] = {};
-  int order[MAX_VERTICES];
-  int orderSize = 0;
-  depthFirstSearch(graph, start, visited, order, orderSize);
-  if (!visitsAllNonIsolatedVertices(graph, visited))
-    return false;
-
-  if (!graph.directed)
-    return true;
-
-  for (int vertex = 0; vertex < graph.vertexCount; ++vertex)
-    visited[vertex] = false;
-  orderSize = 0;
-  depthFirstSearch(graph, start, visited, order, orderSize, true);
-  return visitsAllNonIsolatedVertices(graph, visited);
-}
-
-bool findHamiltonianCycle(const Graph &graph, int vertex,
-                          bool visited[MAX_VERTICES], int path[MAX_VERTICES],
-                          int pathSize) {
-  if (pathSize == graph.vertexCount)
-    return hasEdge(graph, vertex, path[0]);
-
-  for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
-    if (hasEdge(graph, vertex, neighbor) && !visited[neighbor]) {
-      visited[neighbor] = true;
-      path[pathSize] = neighbor;
-      if (findHamiltonianCycle(graph, neighbor, visited, path, pathSize + 1))
+  for (int n = 0; n < v; ++n) {
+    if (adj[now][n] > 0 && visited[n] == false) {
+      visited[n] = true;
+      if (cariSiklus(n, awal, jumlah + 1, v, adj, visited))
         return true;
-      visited[neighbor] = false;
+      visited[n] = false;
     }
   }
   return false;
 }
 
-void printPath(const int path[MAX_VERTICES], int pathSize,
-               bool closesCycle = false) {
-  for (int index = 0; index < pathSize; ++index) {
-    cout << path[index] + 1;
-    if (index < pathSize - 1 || closesCycle)
-      cout << " -> ";
+bool cariLintasan(int now, int jumlah, int v, int adj[][MAX_VERTICES],
+                  bool visited[]) {
+  if (jumlah == v)
+    return true;
+
+  for (int n = 0; n < v; ++n) {
+    if (adj[now][n] > 0 && visited[n] == false) {
+      visited[n] = true;
+      if (cariLintasan(n, jumlah + 1, v, adj, visited))
+        return true;
+      visited[n] = false;
+    }
   }
-  if (closesCycle)
-    cout << path[0] + 1;
-  cout << endl;
+  return false;
 }
 
-void solveRegularGraph() {
-  printSection("DATA GRAF");
-  const int vertexCount = readNonNegativeInteger("Jumlah simpul (n): ");
-  const int degree = readNonNegativeInteger("Derajat (r)      : ");
-  const int degreeSum = vertexCount * degree;
+void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
+  int masuk[MAX_VERTICES] = {};
+  int keluar[MAX_VERTICES] = {};
 
-  printSection("PENYELESAIAN");
-  cout << "Jumlah derajat = n × r" << endl;
-  cout << "               = " << vertexCount << " × " << degree << endl;
-  cout << "               = " << degreeSum << endl << endl;
-  if (degreeSum % 2 != 0)
-    cout << "Karena jumlah derajat ganjil, graf tersebut tidak mungkin dibuat."
-         << endl;
-  else
-    cout << "Jumlah derajat genap; syarat paritas terpenuhi." << endl;
-}
-
-void solveDegreeTwoGraph() {
-  printSection("DATA GRAF");
-  const int edgeCount = readNonNegativeInteger("Jumlah sisi (e): ");
-  int degree;
-  do {
-    degree = readNonNegativeInteger("Derajat (r)    : ");
-    if (degree == 0)
-      cout << "Derajat harus lebih dari 0." << endl;
-  } while (degree == 0);
-
-  const int degreeSum = 2 * edgeCount;
-  printSection("PENYELESAIAN");
-  cout << "Jumlah derajat = 2e" << endl;
-  cout << "               = 2 x " << edgeCount << endl;
-  cout << "               = " << degreeSum << endl << endl;
-
-  if (degreeSum % degree != 0) {
-    cout << "Jumlah simpul = " << degreeSum << " / " << degree
-         << " bukan bilangan bulat, jadi graf berderajat sama tidak mungkin "
-            "dibuat."
-         << endl;
-    return;
-  }
-
-  cout << "Jumlah simpul = 2e / r" << endl;
-  cout << "               = " << degreeSum << " / " << degree << endl;
-  cout << "               = " << degreeSum / degree << endl;
-}
-
-void solveEulerAndHamilton() {
-  Graph graph;
-  readGraph(graph);
-  printMatrix(graph);
-
-  int inDegree[MAX_VERTICES] = {};
-  int outDegree[MAX_VERTICES] = {};
-  int degree[MAX_VERTICES] = {};
-  for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
-    for (int neighbor = 0; neighbor < graph.vertexCount; ++neighbor) {
-      outDegree[vertex] += graph.adjacency[vertex][neighbor];
-      inDegree[vertex] += graph.adjacency[neighbor][vertex];
-      if (vertex == neighbor)
-        degree[vertex] += 2 * graph.adjacency[vertex][neighbor];
-      else
-        degree[vertex] += graph.adjacency[vertex][neighbor];
+  for (int i = 0; i < v; ++i) {
+    for (int j = 0; j < v; ++j) {
+      keluar[i] += adj[i][j];
+      masuk[i] += adj[j][i];
     }
   }
 
-  printSection("PENYELESAIAN");
-  bool isEulerGraph = isEulerConnected(graph);
-  if (graph.directed) {
-    cout << "Derajat masuk dan keluar:" << endl;
-    for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
-      cout << "Simpul " << vertex + 1 << ": masuk = " << inDegree[vertex]
-           << ", keluar = " << outDegree[vertex] << endl;
-      isEulerGraph = isEulerGraph && inDegree[vertex] == outDegree[vertex];
+  int awal = -1;
+  for (int i = 0; i < v && awal == -1; ++i) {
+    if (keluar[i] > 0 || masuk[i] > 0)
+      awal = i;
+  }
+
+  if (awal != -1) {
+    bool visited[MAX_VERTICES] = {};
+    int queue[MAX_VERTICES];
+    int front = 0, back = 0;
+    visited[awal] = true;
+    queue[back++] = awal;
+
+    while (front < back) {
+      int u = queue[front++];
+      for (int j = 0; j < v; ++j) {
+        if ((adj[u][j] > 0 || adj[j][u] > 0) && !visited[j]) {
+          visited[j] = true;
+          queue[back++] = j;
+        }
+      }
     }
+
+    for (int i = 0; i < v; ++i) {
+      if ((keluar[i] > 0 || masuk[i] > 0) && !visited[i]) {
+        cout << "Graf tidak terhubung" << endl;
+        return;
+      }
+    }
+  }
+
+  if (jenisGraf == 1) {
+    int ganjil = 0;
+    for (int i = 0; i < v; ++i) {
+      if (keluar[i] % 2 != 0)
+        ++ganjil;
+    }
+
+    if (ganjil == 0)
+      cout << "Graf Euler" << endl;
+    else if (ganjil == 2)
+      cout << "Graf Semi Euler" << endl;
+    else
+      cout << "Bukan Graf Euler atau Semi Euler" << endl;
   } else {
-    cout << "Derajat simpul:" << endl;
-    for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
-      cout << "Simpul " << vertex + 1 << ": " << degree[vertex] << endl;
-      isEulerGraph = isEulerGraph && degree[vertex] % 2 == 0;
+    int plus = 0, minus = 0, lain = 0;
+    for (int i = 0; i < v; ++i) {
+      int selisih = keluar[i] - masuk[i];
+      if (selisih == 1)
+        ++plus;
+      else if (selisih == -1)
+        ++minus;
+      else if (selisih != 0)
+        ++lain;
     }
-  }
 
-  cout << endl;
-  if (isEulerGraph)
-    cout << "Graf adalah graf Euler." << endl;
-  else
-    cout << "Graf bukan graf Euler." << endl;
-
-  bool visited[MAX_VERTICES] = {};
-  int cycle[MAX_VERTICES] = {};
-  visited[0] = true;
-  if (findHamiltonianCycle(graph, 0, visited, cycle, 1)) {
-    cout << "Graf Hamiltonian: ";
-    printPath(cycle, graph.vertexCount, true);
-  } else {
-    cout << "Graf bukan graf Hamiltonian." << endl;
+    if (lain == 0 && plus == 0 && minus == 0)
+      cout << "Graf Euler" << endl;
+    else if (lain == 0 && plus == 1 && minus == 1)
+      cout << "Graf Semi Euler" << endl;
+    else
+      cout << "Bukan Graf Euler atau Semi Euler" << endl;
   }
 }
 
-void solveDfsAndBfs() {
-  Graph graph;
-  readGraph(graph);
-  printMatrix(graph);
-
-  printSection("TITIK AWAL");
-  int start;
-  do {
-    start =
-        readInteger("Simpul awal [1-" + to_string(graph.vertexCount) + "]: ");
-    if (start < 1 || start > graph.vertexCount)
-      cout << "Simpul awal tidak tersedia." << endl;
-  } while (start < 1 || start > graph.vertexCount);
-  --start;
-
-  int dfsOrder[MAX_VERTICES];
-  int bfsOrder[MAX_VERTICES];
-  int dfsSize = 0;
-  int bfsSize = 0;
-  bool visited[MAX_VERTICES] = {};
-  depthFirstSearch(graph, start, visited, dfsOrder, dfsSize);
-  breadthFirstSearch(graph, start, bfsOrder, bfsSize);
-
-  printSection("PENYELESAIAN");
-  cout << "DFS: ";
-  printPath(dfsOrder, dfsSize);
-  cout << "BFS: ";
-  printPath(bfsOrder, bfsSize);
-}
-
-void verifyAlgorithms() {
-  Graph graph = {false,
-                 6,
-                 {{0, 1, 1, 1, 1, 1},
-                  {1, 0, 1, 1, 1, 1},
-                  {1, 1, 0, 1, 0, 1},
-                  {1, 1, 1, 0, 0, 1},
-                  {1, 1, 0, 0, 0, 1},
-                  {1, 1, 1, 1, 1, 0}}};
-  const int expectedDfs[] = {0, 1, 2, 3, 5, 4};
-  const int expectedBfs[] = {0, 1, 2, 3, 4, 5};
-  bool visited[MAX_VERTICES] = {};
-  int dfsOrder[MAX_VERTICES];
-  int bfsOrder[MAX_VERTICES];
-  int cycle[MAX_VERTICES] = {};
-  int dfsSize = 0;
-  int bfsSize = 0;
-
-  depthFirstSearch(graph, 0, visited, dfsOrder, dfsSize);
-  breadthFirstSearch(graph, 0, bfsOrder, bfsSize);
-  for (int vertex = 0; vertex < graph.vertexCount; ++vertex) {
-    assert(dfsOrder[vertex] == expectedDfs[vertex]);
-    assert(bfsOrder[vertex] == expectedBfs[vertex]);
-  }
-
-  bool cycleVisited[MAX_VERTICES] = {};
-  cycleVisited[0] = true;
-  assert(isEulerConnected(graph));
-  assert(findHamiltonianCycle(graph, 0, cycleVisited, cycle, 1));
-}
-
-void solveQuestion() {
+void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
   while (true) {
-    printSection("PECAHKAN SOAL");
-    for (const Question &question : questions)
-      cout << "  " << question.number << ". " << question.title << endl;
-    cout << "\n  0. Kembali" << endl;
-    cout << DIVIDER << endl;
+    cout << "Input v (1-10): ";
+    if (!(cin >> v)) {
+      cin.clear();
+      cin.ignore(1000, '\n');
+      cout << "Jumlah simpul tidak valid" << endl;
+      continue;
+    }
+    cin.ignore(1000, '\n');
+    if (v < 1 || v > MAX_VERTICES) {
+      cout << "Jumlah simpul tidak valid" << endl;
+      continue;
+    }
+    break;
+  }
 
-    int number = readInteger("Pilih solver [0-4]: ");
-    if (number == 0)
-      return;
+  while (true) {
+    cout << "\nADJACENCY MATRIX\n" << BORDER << endl;
+    cout << "Isi jumlah sisi dari simpul baris ke simpul kolom." << endl;
+    cout << "Diagonal = loop; nilai lebih dari 1 = sisi ganda." << endl;
 
-    const Question *question = findQuestion(number);
-    if (question == nullptr) {
-      cout << "Nomor solver tidak tersedia." << endl;
+    bool matriksValid = true;
+    for (int i = 0; i < v && matriksValid; ++i) {
+      cout << "\nBaris " << i + 1 << ':' << endl;
+      for (int j = 0; j < v; ++j) {
+        cout << "  M[" << i + 1 << "][" << j + 1 << "] = ";
+        if (!(cin >> adj[i][j])) {
+          cin.clear();
+          cin.ignore(1000, '\n');
+          matriksValid = false;
+          break;
+        }
+      }
+    }
+    cin.ignore(1000, '\n');
+
+    if (matriksValid) {
+      for (int i = 0; i < v; ++i) {
+        for (int j = 0; j < v; ++j) {
+          if (adj[i][j] < 0)
+            matriksValid = false;
+        }
+      }
+    }
+    if (!matriksValid) {
+      cout << "Nilai matriks tidak valid" << endl;
       continue;
     }
 
-    showQuestionDetails(*question);
-
-    switch (question->number) {
-    case 1:
-      solveRegularGraph();
-      break;
-    case 2:
-      solveDegreeTwoGraph();
-      break;
-    case 3:
-      solveEulerAndHamilton();
-      break;
-    case 4:
-      solveDfsAndBfs();
-      break;
+    if (jenisGraf == 1) {
+      for (int i = 0; i < v; ++i) {
+        for (int j = i + 1; j < v; ++j) {
+          if (adj[i][j] != adj[j][i])
+            matriksValid = false;
+        }
+      }
+      if (!matriksValid) {
+        cout << "Matriks harus simetris" << endl;
+        continue;
+      }
     }
+    break;
+  }
 
-    waitForEnter("kembali ke daftar solver");
+  cout << "\nADJACENCY MATRIX\n" << BORDER << endl;
+  cout << setw(5) << "";
+  for (int j = 0; j < v; ++j)
+    cout << setw(4) << j + 1;
+  cout << "\n" << string(5 + 4 * v, '-') << endl;
+  for (int i = 0; i < v; ++i) {
+    cout << setw(3) << i + 1 << " |";
+    for (int j = 0; j < v; ++j)
+      cout << setw(4) << adj[i][j];
+    cout << endl;
   }
 }
 
-void mainMenu() {
-  cout << "\nMAIN MENU\n" << DIVIDER << endl;
-  cout << "  1. Lihat Soal" << endl;
-  cout << "  2. Pecahkan Soal" << endl;
-  cout << "  3. Keluar" << endl;
-  cout << DIVIDER << endl;
-}
-
 int main() {
-  const Question *pinnedQuestion = nullptr;
-  verifyAlgorithms();
+  const char *solvers[] = {"Graf Teratur", "Graf Berderajat Sama",
+                           "Euler dan Hamilton", "DFS dan BFS"};
+  string soal;
 
   while (true) {
-    printHeader(pinnedQuestion);
-    mainMenu();
-    int choice = readInteger("Pilih menu [1-3]: ");
+    // ---------- INPUT SOAL (paste, boleh banyak baris) ----------
+    cout << "\nINPUT SOAL\n" << BORDER << endl;
+    cout << "Paste soal, akhiri dengan baris kosong:" << endl;
 
-    switch (choice) {
-    case 1:
-      showQuestion(pinnedQuestion);
-      break;
-    case 2:
-      solveQuestion();
-      break;
-    case 3:
-      cout << "Program berhenti. Terima kasih!" << endl;
-      return 0;
-    default:
-      cout << "Pilihan tidak tersedia." << endl;
+    string soalBaru, line;
+    while (getline(cin, line)) {
+      if (line.find_first_not_of(" \t") == string::npos)
+        break;
+      soalBaru += (soalBaru.empty() ? "" : "\n") + line;
+    }
+
+    if (!soalBaru.empty())
+      soal = soalBaru;
+    if (soal.empty()) {
+      cout << "Soal masih kosong, coba lagi." << endl;
+      continue;
+    }
+
+    // ---------- MAIN MENU ----------
+    bool pilihSoalLain = false;
+    while (!pilihSoalLain) {
+      cout << "\nMAIN MENU\n" << DIVIDER << endl;
+      cout << "Soal aktif : " << soal.substr(0, soal.find('\n')) << endl;
+      cout << DIVIDER << endl;
+      cout << "  1. Pecahkan Soal" << endl;
+      cout << "  2. Lihat Soal" << endl;
+      cout << "  3. Paste Soal Lain" << endl;
+      cout << "  4. Keluar" << endl;
+      cout << DIVIDER << endl << "Input choice: ";
+
+      int choice;
+      if (!(cin >> choice)) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Input harus berupa angka." << endl;
+        continue;
+      }
+      cin.ignore(1000, '\n');
+
+      if (choice == 4) {
+        cout << "Program berhenti. Terima kasih!" << endl;
+        return 0;
+      }
+      if (choice == 2) {
+        cout << "\nSOAL AKTIF\n" << BORDER << "\n\n" << soal << endl;
+        continue;
+      }
+      if (choice == 3) {
+        pilihSoalLain = true;
+        continue;
+      }
+      if (choice != 1) {
+        cout << "Pilihan tidak tersedia." << endl;
+        continue;
+      }
+
+      // ---------- INPUT SOLVERNUMBER ----------
+      while (true) {
+        cout << "\nPECAHKAN SOAL\n" << BORDER << endl;
+        for (int i = 0; i < 4; ++i)
+          cout << "  " << i + 1 << ". " << solvers[i] << endl;
+        cout << "\n  0. Kembali" << endl << DIVIDER << endl;
+        cout << "Input solverNumber [0-4]: ";
+
+        int solverNumber;
+        if (!(cin >> solverNumber)) {
+          cin.clear();
+          cin.ignore(1000, '\n');
+          cout << "Input harus berupa angka." << endl;
+          continue;
+        }
+        cin.ignore(1000, '\n');
+
+        if (solverNumber == 0)
+          break;
+        if (solverNumber < 1 || solverNumber > 4) {
+          cout << "Nomor solver tidak tersedia." << endl;
+          continue;
+        }
+
+        bool tryAgain = false;
+        do {
+          tryAgain = false;
+          char tryAgainInput;
+
+          if (solverNumber == 1) {
+            cout << "\nSOLVER 1 - GRAF TERATUR\n" << BORDER << endl;
+            int n, r;
+            while (true) {
+              cout << "Input n: ";
+              while (!(cin >> n)) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Input harus berupa angka." << endl << "Input n: ";
+              }
+              cout << "Input r: ";
+              while (!(cin >> r)) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Input harus berupa angka." << endl << "Input r: ";
+              }
+              cin.ignore(1000, '\n');
+              if (n < 0 || r < 0)
+                cout << "n dan r tidak boleh negatif." << endl;
+              else
+                break;
+            }
+
+            const int jumlahDerajat = n * r;
+            cout << "\njumlahDerajat = n * r = " << n << " * " << r << " = "
+                 << jumlahDerajat << endl;
+            if (jumlahDerajat % 2 == 0) {
+              const int jumlahSisi = (n * r) / 2;
+              cout << "jumlahSisi = (n * r) / 2 = " << jumlahSisi << endl;
+              cout << "Dapat digambar, jumlah sisi = " << jumlahSisi << endl;
+            } else {
+              cout << "Tidak dapat digambar, karena jumlah derajat semua "
+                      "simpulnya ganjil"
+                   << endl;
+            }
+          } else if (solverNumber == 2) {
+            cout << "\nSOLVER 2 - GRAF BERDERAJAT SAMA\n" << BORDER << endl;
+            int e, r;
+            while (true) {
+              cout << "Input e: ";
+              while (!(cin >> e)) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Input harus berupa angka." << endl << "Input e: ";
+              }
+              cout << "Input r: ";
+              while (!(cin >> r)) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Input harus berupa angka." << endl << "Input r: ";
+              }
+              cin.ignore(1000, '\n');
+              if (r > 0)
+                break;
+              cout << "r harus lebih dari 0." << endl;
+            }
+
+            const int jumlahDerajat = 2 * e;
+            cout << "\njumlahDerajat = 2 * e = 2 * " << e << " = " << jumlahDerajat
+                 << endl;
+            if (jumlahDerajat % r == 0) {
+              cout << "n = jumlahDerajat / r = " << jumlahDerajat << " / " << r
+                   << " = " << jumlahDerajat / r << endl;
+              cout << "Jumlah simpul graf = " << jumlahDerajat / r << endl;
+            } else {
+              cout << "Graf tidak dapat dibentuk, karena jumlah simpul bukan "
+                      "bilangan bulat"
+                   << endl;
+            }
+          } else if (solverNumber == 3) {
+            cout << "\nSOLVER 3 - EULER DAN HAMILTON\n" << BORDER << endl;
+            int jenisGraf;
+            while (true) {
+              cout << "Input jenisGraf (1 = tidak berarah, 2 = berarah): ";
+              if (!(cin >> jenisGraf)) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Input harus berupa angka." << endl;
+                continue;
+              }
+              cin.ignore(1000, '\n');
+              if (jenisGraf == 1 || jenisGraf == 2)
+                break;
+            }
+
+            int v = 0;
+            int adj[MAX_VERTICES][MAX_VERTICES] = {};
+            bacaGraf(jenisGraf, v, adj);
+            cekEuler(jenisGraf, v, adj);
+
+            bool adaSiklus = false;
+            bool visited[MAX_VERTICES] = {};
+            if (v >= 3) {
+              visited[0] = true;
+              adaSiklus = cariSiklus(0, 0, 1, v, adj, visited);
+            }
+
+            if (adaSiklus) {
+              cout << "Graf Hamilton" << endl;
+            } else {
+              bool adaLintasan = false;
+              for (int i = 0; i < v; ++i) {
+                for (int j = 0; j < v; ++j)
+                  visited[j] = false;
+                visited[i] = true;
+                if (cariLintasan(i, 1, v, adj, visited))
+                  adaLintasan = true;
+              }
+
+              if (adaLintasan)
+                cout << "Graf Semi Hamilton" << endl;
+              else
+                cout << "Bukan Graf Hamilton atau Semi Hamilton" << endl;
+            }
+          } else {
+            cout << "\nSOLVER 4 - DFS DAN BFS\n" << BORDER << endl;
+            int v = 0;
+            int adj[MAX_VERTICES][MAX_VERTICES] = {};
+            bacaGraf(1, v, adj);
+
+            int u;
+            cout << "Input u (1 sampai " << v << "): ";
+            if (!(cin >> u)) {
+              cin.clear();
+              cin.ignore(1000, '\n');
+              u = 0;
+            }
+            cin.ignore(1000, '\n');
+
+            if (u >= 1 && u <= v) {
+              --u;
+              bool visited[MAX_VERTICES] = {};
+              cout << "\nDFS: ";
+              dfs(u, v, adj, visited);
+              cout << endl;
+
+              for (int i = 0; i < v; ++i)
+                visited[i] = false;
+              cout << "BFS: ";
+              bfs(u, v, adj, visited);
+              cout << endl;
+            } else {
+              cout << "Simpul awal tidak valid" << endl;
+            }
+          }
+
+          cout << "\nInput tryAgain ( Y / n ): ";
+          cin >> tryAgainInput;
+          cin.ignore(1000, '\n');
+          tryAgain = tryAgainInput == 'Y' || tryAgainInput == 'y';
+        } while (tryAgain);
+        break;
+      }
     }
   }
 }
