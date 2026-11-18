@@ -294,20 +294,20 @@ int main() {
       }
 
       teksSoalAktif = teks;
-      soalAktif = pilihJenisSoal();
-      cout << "\nSoal aktif: " << teksSoalAktif << endl;
-      tampilkanGambar(gambarSoal[soalAktif - 1]);
       break;
     }
 
     // ---------- MAIN MENU ----------
     while (true) {
       cout << "\nMAIN MENU\n" << DIVIDER << endl;
-      if (soalAktif == 0)
-        cout << "Soal aktif : Belum dipilih" << endl;
-      else
+      if (soalAktif > 0)
         cout << "Soal aktif : " << soalAktif << ". " << solvers[soalAktif - 1]
              << endl;
+      else if (!teksSoalAktif.empty())
+        cout << "Soal aktif : "
+             << teksSoalAktif.substr(0, teksSoalAktif.find('\n')) << endl;
+      else
+        cout << "Soal aktif : Belum dipilih" << endl;
       cout << DIVIDER << endl;
       cout << "  1. Pecahkan Soal" << endl;
       cout << "  2. Lihat Soal" << endl;
@@ -329,12 +329,13 @@ int main() {
         return 0;
       }
       if (choice == 2) {
-        if (soalAktif == 0)
+        if (teksSoalAktif.empty())
           cout << "Soal aktif belum dipilih" << endl;
         else {
           cout << "\nSOAL AKTIF\n" << BORDER << "\n\n" << teksSoalAktif
                << endl;
-          tampilkanGambar(gambarSoal[soalAktif - 1]);
+          if (soalAktif > 0)
+            tampilkanGambar(gambarSoal[soalAktif - 1]);
         }
         continue;
       }
