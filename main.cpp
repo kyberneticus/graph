@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -224,8 +225,9 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
 
 int main() {
   const char *solvers[] = {"Graf Teratur", "Graf Berderajat Sama",
-                           "Euler dan Hamilton", "DFS dan BFS"};
-  string soalText[] = {
+                           "Euler dan Hamilton", "DFS dan BFS",
+                           "Paritas dan Havel-Hakimi"};
+  const char *teksBawaan[] = {
       "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
       "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
       "derajat setiap simpul?",
@@ -233,56 +235,73 @@ int main() {
       "dan Hamiltonian?",
       "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
       "dengan DFS dan BFS?",
+      "Apakah barisan derajat yang dimasukkan dapat membentuk graf sederhana? "
+      "(uji paritas dan Havel-Hakimi)",
   };
-  int soalAktif = 0;
-
-  while (true) {
-    // ---------- INPUT SOAL -> lihatSoal(soalAktif) ----------
+  const char *gambarSoal[] = {nullptr, nullptr, "questions/question-3.jpeg",
+                              "questions/question-3.jpeg", nullptr};
+  auto bacaTeksSoal = []() {
+    string teks, line;
+    while (getline(cin, line)) {
+      if (line.find_first_not_of(" \t") == string::npos)
+        break;
+      teks += (teks.empty() ? "" : "\n") + line;
+    }
+    return teks;
+  };
+  auto pilihJenisSoal = [&solvers]() {
     while (true) {
-      cout << "\nDAFTAR SOAL\n" << BORDER << endl;
-      for (int i = 0; i < 4; i++)
+      cout << "\nJenis penyelesaian:" << endl;
+      for (int i = 0; i < 5; i++)
         cout << "  " << i + 1 << ". " << solvers[i] << endl;
-      cout << "\n  0. Kembali" << endl << DIVIDER << endl;
-      cout << "Pilih soal [0-4]: ";
+      cout << "Input jenisSoal (1-5): ";
 
-      int pilihan;
-      if (!(cin >> pilihan)) {
+      int jenisSoal;
+      if (!(cin >> jenisSoal)) {
         cin.clear();
         cin.ignore(1000, '\n');
         cout << "Input harus berupa angka." << endl;
         continue;
       }
       cin.ignore(1000, '\n');
+      if (jenisSoal >= 1 && jenisSoal <= 5)
+        return jenisSoal;
+      cout << "Jenis soal tidak tersedia" << endl;
+    }
+  };
+  auto tampilkanGambar = [](const char *path) {
+    if (path == nullptr)
+      return;
+    cout << endl << "Gambar referensi:" << endl;
+    if (system(("chafa --size=45x14 " + string(path)).c_str()) != 0)
+      cout << "Gambar tidak dapat ditampilkan. Install Chafa dengan: sudo apt "
+              "install chafa"
+           << endl;
+  };
+  string teksSoalAktif;
+  int soalAktif = 0;
 
-      if (pilihan == 0)
-        break;
-      if (pilihan < 1 || pilihan > 4) {
-        cout << "Nomor soal tidak tersedia" << endl;
+  while (true) {
+    // ---------- INPUT SOAL ----------
+    while (true) {
+      cout << "\nINPUT SOAL\n" << BORDER << endl;
+      cout << "Paste teks soal, akhiri dengan baris kosong:" << endl;
+
+      string teks = bacaTeksSoal();
+      if (teks.empty()) {
+        cout << "Soal masih kosong, coba lagi." << endl;
         continue;
       }
 
-      soalAktif = pilihan;
-      cout << "\nPaste teks soal baru (Enter kosong = pakai teks yang ada):"
-           << endl;
-
-      string teks, line;
-      while (getline(cin, line)) {
-        if (line.find_first_not_of(" \t") == string::npos)
-          break;
-        teks += (teks.empty() ? "" : "\n") + line;
-      }
-      if (!teks.empty())
-        soalText[soalAktif - 1] = teks;
-
-      cout << "\nSOAL " << soalAktif << " - " << solvers[soalAktif - 1] << "\n"
-           << BORDER << "\n\n"
-           << soalText[soalAktif - 1] << endl;
+      teksSoalAktif = teks;
+      soalAktif = pilihJenisSoal();
+      cout << "\nSoal aktif: " << teksSoalAktif << endl;
+      tampilkanGambar(gambarSoal[soalAktif - 1]);
       break;
     }
 
     // ---------- MAIN MENU ----------
-    bool pilihSoalLain = false;
-    while (!pilihSoalLain) {
+    while (true) {
       cout << "\nMAIN MENU\n" << DIVIDER << endl;
       if (soalAktif == 0)
         cout << "Soal aktif : Belum dipilih" << endl;
@@ -312,13 +331,54 @@ int main() {
       if (choice == 2) {
         if (soalAktif == 0)
           cout << "Soal aktif belum dipilih" << endl;
-        else
-          cout << "\nSOAL AKTIF\n" << BORDER << "\n\n"
-               << soalText[soalAktif - 1] << endl;
+        else {
+          cout << "\nSOAL AKTIF\n" << BORDER << "\n\n" << teksSoalAktif
+               << endl;
+          tampilkanGambar(gambarSoal[soalAktif - 1]);
+        }
         continue;
       }
-      if (choice == 3) {
-        pilihSoalLain = true;
+      if (choice == 3) { // lihatSoal(soalAktif)
+        while (true) {
+          cout << "\nDAFTAR SOAL\n" << BORDER << endl;
+          for (int i = 0; i < 5; i++)
+            cout << "  " << i + 1 << ". " << solvers[i] << endl;
+          cout << "\n  6. Input soal sendiri" << endl;
+          cout << "  0. Kembali" << endl << DIVIDER << endl;
+          cout << "Pilih soal [0-6]: ";
+
+          int pilihan;
+          if (!(cin >> pilihan)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Input harus berupa angka." << endl;
+            continue;
+          }
+          cin.ignore(1000, '\n');
+
+          if (pilihan == 0)
+            break;
+          if (pilihan == 6) {
+            cout << "\nPaste teks soal, akhiri dengan baris kosong:" << endl;
+            string teks = bacaTeksSoal();
+            if (teks.empty()) {
+              cout << "Soal masih kosong, coba lagi." << endl;
+              continue;
+            }
+            teksSoalAktif = teks;
+            soalAktif = pilihJenisSoal();
+          } else if (pilihan >= 1 && pilihan <= 5) {
+            soalAktif = pilihan;
+            teksSoalAktif = teksBawaan[pilihan - 1];
+          } else {
+            cout << "Nomor soal tidak tersedia" << endl;
+            continue;
+          }
+
+          cout << "\nSoal aktif: " << teksSoalAktif << endl;
+          tampilkanGambar(gambarSoal[soalAktif - 1]);
+          break;
+        }
         continue;
       }
       if (choice != 1) {
@@ -329,10 +389,10 @@ int main() {
       // ---------- INPUT SOLVERNUMBER ----------
       while (true) {
         cout << "\nPECAHKAN SOAL\n" << BORDER << endl;
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
           cout << "  " << i + 1 << ". " << solvers[i] << endl;
         cout << "\n  0. Kembali" << endl << DIVIDER << endl;
-        cout << "Input solverNumber [0-4]: ";
+        cout << "Input solverNumber [0-5]: ";
 
         int solverNumber;
         if (!(cin >> solverNumber)) {
@@ -345,7 +405,7 @@ int main() {
 
         if (solverNumber == 0)
           break;
-        if (solverNumber < 1 || solverNumber > 4) {
+        if (solverNumber < 1 || solverNumber > 5) {
           cout << "Nomor solver tidak tersedia." << endl;
           continue;
         }
@@ -469,7 +529,7 @@ int main() {
               else
                 cout << "Bukan Graf Hamilton atau Semi Hamilton" << endl;
             }
-          } else {
+          } else if (solverNumber == 4) {
             cout << "\nSOLVER 4 - DFS DAN BFS\n" << BORDER << endl;
             int v = 0;
             int adj[MAX_VERTICES][MAX_VERTICES] = {};
@@ -498,6 +558,106 @@ int main() {
               cout << endl;
             } else {
               cout << "Simpul awal tidak valid" << endl;
+            }
+          } else {
+            cout << "\nSOLVER 5 - PARITAS DAN HAVEL-HAKIMI\n" << BORDER
+                 << endl;
+            int n;
+            while (true) {
+              cout << "Input n (1-10): ";
+              if (!(cin >> n)) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Jumlah simpul tidak valid" << endl;
+                continue;
+              }
+              cin.ignore(1000, '\n');
+              if (n >= 1 && n <= MAX_VERTICES)
+                break;
+              cout << "Jumlah simpul tidak valid" << endl;
+            }
+
+            int d[MAX_VERTICES] = {};
+            while (true) {
+              cout << "\nInput derajat tiap simpul:" << endl;
+              bool derajatValid = true;
+              for (int i = 0; i < n; i++) {
+                cout << "  d[" << i + 1 << "] = ";
+                if (!(cin >> d[i])) {
+                  cin.clear();
+                  cin.ignore(1000, '\n');
+                  d[i] = -1;
+                }
+                if (d[i] < 0)
+                  derajatValid = false;
+              }
+              cin.ignore(1000, '\n');
+              if (derajatValid)
+                break;
+              cout << "Nilai derajat tidak valid" << endl;
+            }
+
+            int jumlahDerajat = 0;
+            for (int i = 0; i < n; i++)
+              jumlahDerajat += d[i];
+            cout << "\njumlahDerajat = " << jumlahDerajat << endl;
+
+            if (jumlahDerajat % 2 != 0) {
+              cout << "Tidak dapat digambar, karena jumlah derajat semua "
+                      "simpulnya ganjil"
+                   << endl;
+            } else {
+              int sisa = n;
+              bool bisaDigambar = true;
+
+              while (true) {
+                for (int i = 0; i < sisa; i++)
+                  for (int j = i + 1; j < sisa; j++)
+                    if (d[j] > d[i]) {
+                      int tukar = d[i];
+                      d[i] = d[j];
+                      d[j] = tukar;
+                    }
+
+                cout << "Barisan:";
+                for (int i = 0; i < sisa; i++)
+                  cout << " " << d[i];
+                cout << endl;
+
+                if (sisa == 0 || d[0] == 0)
+                  break;
+
+                int k = d[0];
+                for (int i = 0; i < sisa - 1; i++)
+                  d[i] = d[i + 1];
+                sisa--;
+
+                if (k > sisa) {
+                  bisaDigambar = false;
+                  cout << "Tidak dapat digambar sebagai graf sederhana, karena "
+                          "derajat melebihi jumlah simpul lain"
+                       << endl;
+                  break;
+                }
+
+                for (int i = 0; i < k; i++)
+                  d[i]--;
+
+                bool adaNegatif = false;
+                for (int i = 0; i < sisa; i++)
+                  if (d[i] < 0)
+                    adaNegatif = true;
+                if (adaNegatif) {
+                  bisaDigambar = false;
+                  cout << "Tidak dapat digambar sebagai graf sederhana, karena "
+                          "derajat melebihi jumlah simpul lain"
+                       << endl;
+                  break;
+                }
+              }
+
+              if (bisaDigambar)
+                cout << "Dapat digambar sebagai graf sederhana" << endl;
             }
           }
 
