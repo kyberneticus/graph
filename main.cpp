@@ -11,7 +11,7 @@ void dfs(int u, int v, int adj[][MAX_VERTICES], bool visited[]) {
   visited[u] = true;
   cout << u + 1 << " ";
 
-  for (int n = 0; n < v; ++n) {
+  for (int n = 0; n < v; n++) {
     if (adj[u][n] > 0 && !visited[n])
       dfs(n, v, adj, visited);
   }
@@ -27,7 +27,7 @@ void bfs(int u, int v, int adj[][MAX_VERTICES], bool visited[]) {
     int cur = queue[front++];
     cout << cur + 1 << " ";
 
-    for (int n = 0; n < v; ++n) {
+    for (int n = 0; n < v; n++) {
       if (adj[cur][n] > 0 && !visited[n]) {
         visited[n] = true;
         queue[back++] = n;
@@ -41,7 +41,7 @@ bool cariSiklus(int now, int awal, int jumlah, int v,
   if (jumlah == v)
     return adj[now][awal] > 0;
 
-  for (int n = 0; n < v; ++n) {
+  for (int n = 0; n < v; n++) {
     if (adj[now][n] > 0 && visited[n] == false) {
       visited[n] = true;
       if (cariSiklus(n, awal, jumlah + 1, v, adj, visited))
@@ -57,7 +57,7 @@ bool cariLintasan(int now, int jumlah, int v, int adj[][MAX_VERTICES],
   if (jumlah == v)
     return true;
 
-  for (int n = 0; n < v; ++n) {
+  for (int n = 0; n < v; n++) {
     if (adj[now][n] > 0 && visited[n] == false) {
       visited[n] = true;
       if (cariLintasan(n, jumlah + 1, v, adj, visited))
@@ -72,15 +72,15 @@ void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
   int masuk[MAX_VERTICES] = {};
   int keluar[MAX_VERTICES] = {};
 
-  for (int i = 0; i < v; ++i) {
-    for (int j = 0; j < v; ++j) {
+  for (int i = 0; i < v; i++) {
+    for (int j = 0; j < v; j++) {
       keluar[i] += adj[i][j];
       masuk[i] += adj[j][i];
     }
   }
 
   int awal = -1;
-  for (int i = 0; i < v && awal == -1; ++i) {
+  for (int i = 0; i < v && awal == -1; i++) {
     if (keluar[i] > 0 || masuk[i] > 0)
       awal = i;
   }
@@ -94,7 +94,7 @@ void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
 
     while (front < back) {
       int u = queue[front++];
-      for (int j = 0; j < v; ++j) {
+      for (int j = 0; j < v; j++) {
         if ((adj[u][j] > 0 || adj[j][u] > 0) && !visited[j]) {
           visited[j] = true;
           queue[back++] = j;
@@ -102,7 +102,7 @@ void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
       }
     }
 
-    for (int i = 0; i < v; ++i) {
+    for (int i = 0; i < v; i++) {
       if ((keluar[i] > 0 || masuk[i] > 0) && !visited[i]) {
         cout << "Graf tidak terhubung" << endl;
         return;
@@ -112,9 +112,9 @@ void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
 
   if (jenisGraf == 1) {
     int ganjil = 0;
-    for (int i = 0; i < v; ++i) {
+    for (int i = 0; i < v; i++) {
       if (keluar[i] % 2 != 0)
-        ++ganjil;
+        ganjil++;
     }
 
     if (ganjil == 0)
@@ -125,14 +125,14 @@ void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
       cout << "Bukan Graf Euler atau Semi Euler" << endl;
   } else {
     int plus = 0, minus = 0, lain = 0;
-    for (int i = 0; i < v; ++i) {
+    for (int i = 0; i < v; i++) {
       int selisih = keluar[i] - masuk[i];
       if (selisih == 1)
-        ++plus;
+        plus++;
       else if (selisih == -1)
-        ++minus;
+        minus++;
       else if (selisih != 0)
-        ++lain;
+        lain++;
     }
 
     if (lain == 0 && plus == 0 && minus == 0)
@@ -167,9 +167,9 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
     cout << "Diagonal = loop; nilai lebih dari 1 = sisi ganda." << endl;
 
     bool matriksValid = true;
-    for (int i = 0; i < v && matriksValid; ++i) {
+    for (int i = 0; i < v && matriksValid; i++) {
       cout << "\nBaris " << i + 1 << ':' << endl;
-      for (int j = 0; j < v; ++j) {
+      for (int j = 0; j < v; j++) {
         cout << "  M[" << i + 1 << "][" << j + 1 << "] = ";
         if (!(cin >> adj[i][j])) {
           cin.clear();
@@ -182,8 +182,8 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
     cin.ignore(1000, '\n');
 
     if (matriksValid) {
-      for (int i = 0; i < v; ++i) {
-        for (int j = 0; j < v; ++j) {
+      for (int i = 0; i < v; i++) {
+        for (int j = 0; j < v; j++) {
           if (adj[i][j] < 0)
             matriksValid = false;
         }
@@ -195,8 +195,8 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
     }
 
     if (jenisGraf == 1) {
-      for (int i = 0; i < v; ++i) {
-        for (int j = i + 1; j < v; ++j) {
+      for (int i = 0; i < v; i++) {
+        for (int j = i + 1; j < v; j++) {
           if (adj[i][j] != adj[j][i])
             matriksValid = false;
         }
@@ -211,12 +211,12 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
 
   cout << "\nADJACENCY MATRIX\n" << BORDER << endl;
   cout << setw(5) << "";
-  for (int j = 0; j < v; ++j)
+  for (int j = 0; j < v; j++)
     cout << setw(4) << j + 1;
   cout << "\n" << string(5 + 4 * v, '-') << endl;
-  for (int i = 0; i < v; ++i) {
+  for (int i = 0; i < v; i++) {
     cout << setw(3) << i + 1 << " |";
-    for (int j = 0; j < v; ++j)
+    for (int j = 0; j < v; j++)
       cout << setw(4) << adj[i][j];
     cout << endl;
   }
@@ -287,7 +287,7 @@ int main() {
       // ---------- INPUT SOLVERNUMBER ----------
       while (true) {
         cout << "\nPECAHKAN SOAL\n" << BORDER << endl;
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; i++)
           cout << "  " << i + 1 << ". " << solvers[i] << endl;
         cout << "\n  0. Kembali" << endl << DIVIDER << endl;
         cout << "Input solverNumber [0-4]: ";
@@ -414,8 +414,8 @@ int main() {
               cout << "Graf Hamilton" << endl;
             } else {
               bool adaLintasan = false;
-              for (int i = 0; i < v; ++i) {
-                for (int j = 0; j < v; ++j)
+              for (int i = 0; i < v; i++) {
+                for (int j = 0; j < v; j++)
                   visited[j] = false;
                 visited[i] = true;
                 if (cariLintasan(i, 1, v, adj, visited))
@@ -449,7 +449,7 @@ int main() {
               dfs(u, v, adj, visited);
               cout << endl;
 
-              for (int i = 0; i < v; ++i)
+              for (int i = 0; i < v; i++)
                 visited[i] = false;
               cout << "BFS: ";
               bfs(u, v, adj, visited);
