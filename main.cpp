@@ -420,11 +420,12 @@ int main() {
             cout << "\nSOLVER 1 - GRAF TERATUR\n" << BORDER << endl;
             int n, r;
             while (true) {
-              cout << "Input n: ";
+              cout << "Input n (jumlah simpul): ";
               while (!(cin >> n)) {
                 cin.clear();
                 cin.ignore(1000, '\n');
-                cout << "Input harus berupa angka." << endl << "Input n: ";
+                cout << "Input harus berupa angka." << endl
+                     << "Input n (jumlah simpul): ";
               }
               cout << "Input r: ";
               while (!(cin >> r)) {
