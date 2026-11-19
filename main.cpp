@@ -456,11 +456,11 @@ int main() {
             cout << "\nSOLVER 2 - GRAF BERDERAJAT SAMA\n" << BORDER << endl;
             int e, r;
             while (true) {
-              cout << "Input e: ";
+              cout << "Input e (jumlah sisi): ";
               while (!(cin >> e)) {
                 cin.clear();
                 cin.ignore(1000, '\n');
-                cout << "Input harus berupa angka." << endl << "Input e: ";
+                cout << "Input harus berupa angka." << endl << "Input e (jumlah sisi): ";
               }
               cout << "Input r (derajat tiap simpul): ";
               while (!(cin >> r)) {
