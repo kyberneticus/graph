@@ -427,11 +427,11 @@ int main() {
                 cout << "Input harus berupa angka." << endl
                      << "Input n (jumlah simpul): ";
               }
-              cout << "Input r: ";
+              cout << "Input r (derajat tiap simpul): ";
               while (!(cin >> r)) {
                 cin.clear();
                 cin.ignore(1000, '\n');
-                cout << "Input harus berupa angka." << endl << "Input r: ";
+                cout << "Input harus berupa angka." << endl << "Input r (derajat tiap simpul): ";
               }
               cin.ignore(1000, '\n');
               if (n < 0 || r < 0)
@@ -462,11 +462,11 @@ int main() {
                 cin.ignore(1000, '\n');
                 cout << "Input harus berupa angka." << endl << "Input e: ";
               }
-              cout << "Input r: ";
+              cout << "Input r (derajat tiap simpul): ";
               while (!(cin >> r)) {
                 cin.clear();
                 cin.ignore(1000, '\n');
-                cout << "Input harus berupa angka." << endl << "Input r: ";
+                cout << "Input harus berupa angka." << endl << "Input r (derajat tiap simpul): ";
               }
               cin.ignore(1000, '\n');
               if (r > 0)
