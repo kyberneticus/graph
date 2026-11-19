@@ -13,14 +13,10 @@ const string judulSoal[] = {"Graf Teratur", "Graf Berderajat Sama",
                             "Paritas dan Havel-Hakimi"};
 const string teksSoal[] = {
     "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
-    "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
-    "derajat setiap simpul?",
-    "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler "
-    "dan Hamiltonian?",
-    "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
-    "dengan DFS dan BFS?",
-    "Apakah barisan derajat yang dimasukkan dapat membentuk graf sederhana? "
-    "(uji paritas dan Havel-Hakimi)",
+    "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan derajat setiap simpul?",
+    "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler dan Hamiltonian?",
+    "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal dengan DFS dan BFS?",
+    "Apakah barisan derajat yang dimasukkan dapat membentuk graf sederhana? (uji paritas dan Havel-Hakimi)",
 };
 const string gambarSoal[] = {"", "", "questions/question-3.jpeg",
                              "questions/question-3.jpeg", ""};
