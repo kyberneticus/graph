@@ -8,6 +8,37 @@ const int MAX_VERTICES = 10;
 const string BORDER(42, '=');
 const string DIVIDER(42, '-');
 
+struct Soal {
+  int nomor;
+  const char *judul;
+  const char *teks;
+  const char *gambar;
+};
+
+const Soal daftarSoal[] = {
+    {1, "Graf Teratur",
+     "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
+     nullptr},
+    {2, "Graf Berderajat Sama",
+     "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
+     "derajat setiap simpul?",
+     nullptr},
+    {3, "Euler dan Hamilton",
+     "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler "
+     "dan Hamiltonian?",
+     "questions/question-3.jpeg"},
+    {4, "DFS dan BFS",
+     "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
+     "dengan DFS dan BFS?",
+     "questions/question-3.jpeg"},
+    {5, "Paritas dan Havel-Hakimi",
+     "Apakah barisan derajat yang dimasukkan dapat membentuk graf sederhana? "
+     "(uji paritas dan Havel-Hakimi)",
+     nullptr},
+};
+
+const int jumlahSoal = sizeof(daftarSoal) / sizeof(daftarSoal[0]);
+
 void dfs(int u, int v, int adj[][MAX_VERTICES], bool visited[]) {
   visited[u] = true;
   cout << u + 1 << " ";
@@ -226,22 +257,6 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
 }
 
 int main() {
-  const char *solvers[] = {"Graf Teratur", "Graf Berderajat Sama",
-                           "Euler dan Hamilton", "DFS dan BFS",
-                           "Paritas dan Havel-Hakimi"};
-  const char *teksBawaan[] = {
-      "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
-      "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
-      "derajat setiap simpul?",
-      "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler "
-      "dan Hamiltonian?",
-      "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
-      "dengan DFS dan BFS?",
-      "Apakah barisan derajat yang dimasukkan dapat membentuk graf sederhana? "
-      "(uji paritas dan Havel-Hakimi)",
-  };
-  const char *gambarSoal[] = {nullptr, nullptr, "questions/question-3.jpeg",
-                              "questions/question-3.jpeg", nullptr};
   auto bacaTeksSoal = []() {
     string teks, line;
     while (getline(cin, line)) {
@@ -251,11 +266,11 @@ int main() {
     }
     return teks;
   };
-  auto pilihJenisSoal = [&solvers]() {
+  auto pilihJenisSoal = []() {
     while (true) {
       cout << "\nJenis penyelesaian:" << endl;
-      for (int i = 0; i < 5; i++)
-        cout << "  " << i + 1 << ". " << solvers[i] << endl;
+      for (int i = 0; i < jumlahSoal; i++)
+        cout << "  " << i + 1 << ". " << daftarSoal[i].judul << endl;
       cout << "Input jenisSoal (1-5): ";
 
       int jenisSoal;
@@ -266,7 +281,7 @@ int main() {
         continue;
       }
       cin.ignore(1000, '\n');
-      if (jenisSoal >= 1 && jenisSoal <= 5)
+      if (jenisSoal >= 1 && jenisSoal <= jumlahSoal)
         return jenisSoal;
       cout << "Jenis soal tidak tersedia" << endl;
     }
@@ -303,7 +318,7 @@ int main() {
     while (true) {
       cout << "\nMAIN MENU\n" << DIVIDER << endl;
       if (soalAktif > 0)
-        cout << "Soal aktif : " << soalAktif << ". " << solvers[soalAktif - 1]
+        cout << "Soal aktif : " << soalAktif << ". " << daftarSoal[soalAktif - 1].judul
              << endl;
       else if (!teksSoalAktif.empty())
         cout << "Soal aktif : "
@@ -333,8 +348,9 @@ int main() {
       if (choice == 2) { // lihatSoal(soalAktif)
         while (true) {
           cout << "\nDAFTAR SOAL\n" << BORDER << endl;
-          for (int i = 0; i < 5; i++)
-            cout << "  " << i + 1 << ". " << solvers[i] << endl;
+          for (int i = 0; i < jumlahSoal; i++)
+            cout << "  " << i + 1 << ". " << daftarSoal[i].judul
+                 << endl;
           cout << "\n  6. Input soal sendiri" << endl;
           cout << "  0. Kembali" << endl << DIVIDER << endl;
           cout << "Pilih soal [0-6]: ";
@@ -359,16 +375,16 @@ int main() {
             }
             teksSoalAktif = teks;
             soalAktif = pilihJenisSoal();
-          } else if (pilihan >= 1 && pilihan <= 5) {
+          } else if (pilihan >= 1 && pilihan <= jumlahSoal) {
             soalAktif = pilihan;
-            teksSoalAktif = teksBawaan[pilihan - 1];
+            teksSoalAktif = daftarSoal[pilihan - 1].teks;
           } else {
             cout << "Nomor soal tidak tersedia" << endl;
             continue;
           }
 
           cout << "\nSoal aktif: " << teksSoalAktif << endl;
-          tampilkanGambar(gambarSoal[soalAktif - 1]);
+          tampilkanGambar(daftarSoal[soalAktif - 1].gambar);
           break;
         }
         continue;
@@ -393,8 +409,8 @@ int main() {
       // ---------- INPUT SOLVERNUMBER ----------
       while (true) {
         cout << "\nPECAHKAN SOAL\n" << BORDER << endl;
-        for (int i = 0; i < 5; i++)
-          cout << "  " << i + 1 << ". " << solvers[i] << endl;
+        for (int i = 0; i < jumlahSoal; i++)
+          cout << "  " << i + 1 << ". " << daftarSoal[i].judul << endl;
         cout << "\n  0. Kembali" << endl << DIVIDER << endl;
         cout << "Input solverNumber [0-5]: ";
 
@@ -409,7 +425,7 @@ int main() {
 
         if (solverNumber == 0)
           break;
-        if (solverNumber < 1 || solverNumber > 5) {
+        if (solverNumber < 1 || solverNumber > jumlahSoal) {
           cout << "Nomor solver tidak tersedia." << endl;
           continue;
         }
