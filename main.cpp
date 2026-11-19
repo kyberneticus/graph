@@ -53,34 +53,44 @@ void bfs(int u, int v, int adj[][MAX_VERTICES], bool visited[]) {
 
 bool cariSiklus(int now, int awal, int jumlah, int v,
                 int adj[][MAX_VERTICES], bool visited[]) {
-  if (jumlah == v)
-    return adj[now][awal] > 0;
+  bool hasil;
 
-  for (int n = 0; n < v; n++) {
-    if (adj[now][n] > 0 && visited[n] == false) {
-      visited[n] = true;
-      if (cariSiklus(n, awal, jumlah + 1, v, adj, visited))
-        return true;
-      visited[n] = false;
+  if (jumlah == v) {
+    hasil = adj[now][awal] > 0;
+  } else {
+    hasil = false;
+    for (int n = 0; n < v; n++) {
+      if (adj[now][n] > 0 && visited[n] == false) {
+        visited[n] = true;
+        hasil = cariSiklus(n, awal, jumlah + 1, v, adj, visited);
+        if (hasil)
+          break;
+        visited[n] = false;
+      }
     }
   }
-  return false;
+  return hasil;
 }
 
 bool cariLintasan(int now, int jumlah, int v, int adj[][MAX_VERTICES],
                   bool visited[]) {
-  if (jumlah == v)
-    return true;
+  bool hasil;
 
-  for (int n = 0; n < v; n++) {
-    if (adj[now][n] > 0 && visited[n] == false) {
-      visited[n] = true;
-      if (cariLintasan(n, jumlah + 1, v, adj, visited))
-        return true;
-      visited[n] = false;
+  if (jumlah == v) {
+    hasil = true;
+  } else {
+    hasil = false;
+    for (int n = 0; n < v; n++) {
+      if (adj[now][n] > 0 && visited[n] == false) {
+        visited[n] = true;
+        hasil = cariLintasan(n, jumlah + 1, v, adj, visited);
+        if (hasil)
+          break;
+        visited[n] = false;
+      }
     }
   }
-  return false;
+  return hasil;
 }
 
 void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
