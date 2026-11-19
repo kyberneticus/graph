@@ -147,7 +147,7 @@ void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
 
 void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
   while (true) {
-    cout << "Input v (1-10): ";
+    cout << "Input v (jumlah simpul, 1-10): ";
     if (!(cin >> v)) {
       cin.clear();
       cin.ignore(1000, '\n');
