@@ -164,6 +164,7 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
 
   while (true) {
     cout << "\nADJACENCY MATRIX\n" << BORDER << endl;
+    cout << "M = matrix\n" << endl;
     cout << "Isi jumlah sisi dari simpul baris ke simpul kolom." << endl;
     cout << "Diagonal = loop; nilai lebih dari 1 = sisi ganda." << endl;
 
