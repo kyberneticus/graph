@@ -114,7 +114,8 @@ void cekEuler(int jenisGraf, int v, int adj[][MAX_VERTICES]) {
   if (jenisGraf == 1) {
     int ganjil = 0;
     for (int i = 0; i < v; i++) {
-      if (keluar[i] % 2 != 0)
+      int derajat = keluar[i] + adj[i][i]; // loop dua ujung: +2
+      if (derajat % 2 != 0)
         ganjil++;
     }
 
