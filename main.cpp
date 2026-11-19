@@ -312,8 +312,8 @@ int main() {
         cout << "Soal aktif : Belum dipilih" << endl;
       cout << DIVIDER << endl;
       cout << "  1. Pecahkan Soal" << endl;
-      cout << "  2. Lihat Soal" << endl;
-      cout << "  3. Pilih Soal Lain" << endl;
+      cout << "  2. Daftar Soal" << endl;
+      cout << "  3. Input Soal Baru" << endl;
       cout << "  4. Keluar" << endl;
       cout << DIVIDER << endl << "Input choice: ";
 
@@ -330,18 +330,7 @@ int main() {
         cout << "Program berhenti. Terima kasih!" << endl;
         return 0;
       }
-      if (choice == 2) {
-        if (teksSoalAktif.empty())
-          cout << "Soal aktif belum dipilih" << endl;
-        else {
-          cout << "\nSOAL AKTIF\n" << BORDER << "\n\n" << teksSoalAktif
-               << endl;
-          if (soalAktif > 0)
-            tampilkanGambar(gambarSoal[soalAktif - 1]);
-        }
-        continue;
-      }
-      if (choice == 3) { // lihatSoal(soalAktif)
+      if (choice == 2) { // lihatSoal(soalAktif)
         while (true) {
           cout << "\nDAFTAR SOAL\n" << BORDER << endl;
           for (int i = 0; i < 5; i++)
@@ -382,6 +371,18 @@ int main() {
           tampilkanGambar(gambarSoal[soalAktif - 1]);
           break;
         }
+        continue;
+      }
+      if (choice == 3) { // Input Soal
+        cout << "\nPaste teks soal, akhiri dengan baris kosong:" << endl;
+        string teks = bacaTeksSoal();
+        if (teks.empty()) {
+          cout << "Soal masih kosong, coba lagi." << endl;
+          continue;
+        }
+        teksSoalAktif = teks;
+        soalAktif = 0;
+        cout << "\nSoal aktif: " << teksSoalAktif << endl;
         continue;
       }
       if (choice != 1) {
