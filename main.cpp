@@ -8,10 +8,10 @@ const int MAX_VERTICES = 10;
 const string BORDER(42, '=');
 const string DIVIDER(42, '-');
 
-const char *judulSoal[] = {"Graf Teratur", "Graf Berderajat Sama",
-                           "Euler dan Hamilton", "DFS dan BFS",
-                           "Paritas dan Havel-Hakimi"};
-const char *teksSoal[] = {
+const string judulSoal[] = {"Graf Teratur", "Graf Berderajat Sama",
+                            "Euler dan Hamilton", "DFS dan BFS",
+                            "Paritas dan Havel-Hakimi"};
+const string teksSoal[] = {
     "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
     "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
     "derajat setiap simpul?",
@@ -22,8 +22,8 @@ const char *teksSoal[] = {
     "Apakah barisan derajat yang dimasukkan dapat membentuk graf sederhana? "
     "(uji paritas dan Havel-Hakimi)",
 };
-const char *gambarSoal[] = {nullptr, nullptr, "questions/question-3.jpeg",
-                            "questions/question-3.jpeg", nullptr};
+const string gambarSoal[] = {"", "", "questions/question-3.jpeg",
+                             "questions/question-3.jpeg", ""};
 const int jumlahSoal = 5;
 
 void dfs(int u, int v, int adj[][MAX_VERTICES], bool visited[]) {
@@ -273,11 +273,11 @@ int main() {
       cout << "Jenis soal tidak tersedia" << endl;
     }
   };
-  auto tampilkanGambar = [](const char *path) {
-    if (path == nullptr)
+  auto tampilkanGambar = [](const string &path) {
+    if (path.empty())
       return;
     cout << endl << "Gambar referensi:" << endl;
-    if (system(("chafa --size=45x14 " + string(path)).c_str()) != 0)
+    if (system(("chafa --size=45x14 " + path).c_str()) != 0)
       cout << "Gambar tidak dapat ditampilkan. Install Chafa dengan: sudo apt "
               "install chafa"
            << endl;
