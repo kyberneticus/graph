@@ -239,6 +239,186 @@ void bacaGraf(int jenisGraf, int &v, int adj[][MAX_VERTICES]) {
   }
 }
 
+void cekEulerAtauHamilton() {
+  cout << "\nSOLVER 3 - EULER DAN HAMILTON\n" << BORDER << endl;
+  int jenisGraf;
+  while (true) {
+    cout << "Input jenisGraf (1 = tidak berarah, 2 = berarah): ";
+    if (!(cin >> jenisGraf)) {
+      cin.clear();
+      cin.ignore(1000, '\n');
+      cout << "Input harus berupa angka." << endl;
+      continue;
+    }
+    cin.ignore(1000, '\n');
+    if (jenisGraf == 1 || jenisGraf == 2)
+      break;
+  }
+
+  int v = 0;
+  int adj[MAX_VERTICES][MAX_VERTICES] = {};
+  bacaGraf(jenisGraf, v, adj);
+  cekEuler(jenisGraf, v, adj);
+
+  bool adaSiklus = false;
+  bool visited[MAX_VERTICES] = {};
+  if (v >= 3) {
+    visited[0] = true;
+    adaSiklus = cariSiklus(0, 0, 1, v, adj, visited);
+  }
+
+  if (adaSiklus) {
+    cout << "Graf Hamilton" << endl;
+  } else {
+    bool adaLintasan = false;
+    for (int i = 0; i < v; i++) {
+      for (int j = 0; j < v; j++)
+        visited[j] = false;
+      visited[i] = true;
+      if (cariLintasan(i, 1, v, adj, visited))
+        adaLintasan = true;
+    }
+
+    if (adaLintasan)
+      cout << "Graf Semi Hamilton" << endl;
+    else
+      cout << "Bukan Graf Hamilton atau Semi Hamilton" << endl;
+  }
+}
+
+void cekDfsAtauBfs() {
+  cout << "\nSOLVER 4 - DFS DAN BFS\n" << BORDER << endl;
+  int v = 0;
+  int adj[MAX_VERTICES][MAX_VERTICES] = {};
+  bacaGraf(1, v, adj);
+
+  int u;
+  cout << "Input u (1 sampai " << v << "): ";
+  if (!(cin >> u)) {
+    cin.clear();
+    cin.ignore(1000, '\n');
+    u = 0;
+  }
+  cin.ignore(1000, '\n');
+
+  if (u >= 1 && u <= v) {
+    --u;
+    bool visited[MAX_VERTICES] = {};
+    cout << "\nDFS: ";
+    dfs(u, v, adj, visited);
+    cout << endl;
+
+    for (int i = 0; i < v; i++)
+      visited[i] = false;
+    cout << "BFS: ";
+    bfs(u, v, adj, visited);
+    cout << endl;
+  } else {
+    cout << "Simpul awal tidak valid" << endl;
+  }
+}
+
+void cekParitasDanHavelHakimi() {
+  cout << "\nSOLVER 5 - PARITAS DAN HAVEL-HAKIMI\n" << BORDER << endl;
+  int n;
+  while (true) {
+    cout << "Input n (1-10): ";
+    if (!(cin >> n)) {
+      cin.clear();
+      cin.ignore(1000, '\n');
+      cout << "Jumlah simpul tidak valid" << endl;
+      continue;
+    }
+    cin.ignore(1000, '\n');
+    if (n >= 1 && n <= MAX_VERTICES)
+      break;
+    cout << "Jumlah simpul tidak valid" << endl;
+  }
+
+  int d[MAX_VERTICES] = {};
+  while (true) {
+    cout << "\nInput derajat tiap simpul:" << endl;
+    bool derajatValid = true;
+    for (int i = 0; i < n; i++) {
+      cout << "  d[" << i + 1 << "] = ";
+      if (!(cin >> d[i])) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        d[i] = -1;
+      }
+      if (d[i] < 0)
+        derajatValid = false;
+    }
+    cin.ignore(1000, '\n');
+    if (derajatValid)
+      break;
+    cout << "Nilai derajat tidak valid" << endl;
+  }
+
+  int jumlahDerajat = 0;
+  for (int i = 0; i < n; i++)
+    jumlahDerajat += d[i];
+  cout << "\njumlahDerajat = " << jumlahDerajat << endl;
+
+  if (jumlahDerajat % 2 != 0) {
+    cout << "Tidak dapat digambar, karena jumlah derajat semua "
+            "simpulnya ganjil"
+         << endl;
+  } else {
+    int sisa = n;
+    bool bisaDigambar = true;
+
+    while (true) {
+      for (int i = 0; i < sisa; i++)
+        for (int j = i + 1; j < sisa; j++)
+          if (d[j] > d[i]) {
+            int tukar = d[i];
+            d[i] = d[j];
+            d[j] = tukar;
+          }
+
+      cout << "Barisan:";
+      for (int i = 0; i < sisa; i++)
+        cout << " " << d[i];
+      cout << endl;
+
+      if (sisa == 0 || d[0] == 0)
+        break;
+
+      int k = d[0];
+      for (int i = 0; i < sisa - 1; i++)
+        d[i] = d[i + 1];
+      sisa--;
+
+      if (k > sisa) {
+        bisaDigambar = false;
+        cout << "Tidak dapat digambar sebagai graf sederhana, karena "
+                "derajat melebihi jumlah simpul lain"
+             << endl;
+        break;
+      }
+
+      for (int i = 0; i < k; i++)
+        d[i]--;
+
+      bool adaNegatif = false;
+      for (int i = 0; i < sisa; i++)
+        if (d[i] < 0)
+          adaNegatif = true;
+      if (adaNegatif) {
+        bisaDigambar = false;
+        cout << "Tidak dapat digambar sebagai graf sederhana, karena "
+                "derajat melebihi jumlah simpul lain"
+             << endl;
+        break;
+      }
+    }
+
+    if (bisaDigambar)
+      cout << "Dapat digambar sebagai graf sederhana" << endl;
+  }
+}
+
 int main() {
   auto bacaTeksSoal = []() {
     string teks, line;
@@ -489,180 +669,11 @@ int main() {
                    << endl;
             }
           } else if (solverNumber == 3) {
-            cout << "\nSOLVER 3 - EULER DAN HAMILTON\n" << BORDER << endl;
-            int jenisGraf;
-            while (true) {
-              cout << "Input jenisGraf (1 = tidak berarah, 2 = berarah): ";
-              if (!(cin >> jenisGraf)) {
-                cin.clear();
-                cin.ignore(1000, '\n');
-                cout << "Input harus berupa angka." << endl;
-                continue;
-              }
-              cin.ignore(1000, '\n');
-              if (jenisGraf == 1 || jenisGraf == 2)
-                break;
-            }
-
-            int v = 0;
-            int adj[MAX_VERTICES][MAX_VERTICES] = {};
-            bacaGraf(jenisGraf, v, adj);
-            cekEuler(jenisGraf, v, adj);
-
-            bool adaSiklus = false;
-            bool visited[MAX_VERTICES] = {};
-            if (v >= 3) {
-              visited[0] = true;
-              adaSiklus = cariSiklus(0, 0, 1, v, adj, visited);
-            }
-
-            if (adaSiklus) {
-              cout << "Graf Hamilton" << endl;
-            } else {
-              bool adaLintasan = false;
-              for (int i = 0; i < v; i++) {
-                for (int j = 0; j < v; j++)
-                  visited[j] = false;
-                visited[i] = true;
-                if (cariLintasan(i, 1, v, adj, visited))
-                  adaLintasan = true;
-              }
-
-              if (adaLintasan)
-                cout << "Graf Semi Hamilton" << endl;
-              else
-                cout << "Bukan Graf Hamilton atau Semi Hamilton" << endl;
-            }
+            cekEulerAtauHamilton();
           } else if (solverNumber == 4) {
-            cout << "\nSOLVER 4 - DFS DAN BFS\n" << BORDER << endl;
-            int v = 0;
-            int adj[MAX_VERTICES][MAX_VERTICES] = {};
-            bacaGraf(1, v, adj);
-
-            int u;
-            cout << "Input u (1 sampai " << v << "): ";
-            if (!(cin >> u)) {
-              cin.clear();
-              cin.ignore(1000, '\n');
-              u = 0;
-            }
-            cin.ignore(1000, '\n');
-
-            if (u >= 1 && u <= v) {
-              --u;
-              bool visited[MAX_VERTICES] = {};
-              cout << "\nDFS: ";
-              dfs(u, v, adj, visited);
-              cout << endl;
-
-              for (int i = 0; i < v; i++)
-                visited[i] = false;
-              cout << "BFS: ";
-              bfs(u, v, adj, visited);
-              cout << endl;
-            } else {
-              cout << "Simpul awal tidak valid" << endl;
-            }
+            cekDfsAtauBfs();
           } else {
-            cout << "\nSOLVER 5 - PARITAS DAN HAVEL-HAKIMI\n" << BORDER
-                 << endl;
-            int n;
-            while (true) {
-              cout << "Input n (1-10): ";
-              if (!(cin >> n)) {
-                cin.clear();
-                cin.ignore(1000, '\n');
-                cout << "Jumlah simpul tidak valid" << endl;
-                continue;
-              }
-              cin.ignore(1000, '\n');
-              if (n >= 1 && n <= MAX_VERTICES)
-                break;
-              cout << "Jumlah simpul tidak valid" << endl;
-            }
-
-            int d[MAX_VERTICES] = {};
-            while (true) {
-              cout << "\nInput derajat tiap simpul:" << endl;
-              bool derajatValid = true;
-              for (int i = 0; i < n; i++) {
-                cout << "  d[" << i + 1 << "] = ";
-                if (!(cin >> d[i])) {
-                  cin.clear();
-                  cin.ignore(1000, '\n');
-                  d[i] = -1;
-                }
-                if (d[i] < 0)
-                  derajatValid = false;
-              }
-              cin.ignore(1000, '\n');
-              if (derajatValid)
-                break;
-              cout << "Nilai derajat tidak valid" << endl;
-            }
-
-            int jumlahDerajat = 0;
-            for (int i = 0; i < n; i++)
-              jumlahDerajat += d[i];
-            cout << "\njumlahDerajat = " << jumlahDerajat << endl;
-
-            if (jumlahDerajat % 2 != 0) {
-              cout << "Tidak dapat digambar, karena jumlah derajat semua "
-                      "simpulnya ganjil"
-                   << endl;
-            } else {
-              int sisa = n;
-              bool bisaDigambar = true;
-
-              while (true) {
-                for (int i = 0; i < sisa; i++)
-                  for (int j = i + 1; j < sisa; j++)
-                    if (d[j] > d[i]) {
-                      int tukar = d[i];
-                      d[i] = d[j];
-                      d[j] = tukar;
-                    }
-
-                cout << "Barisan:";
-                for (int i = 0; i < sisa; i++)
-                  cout << " " << d[i];
-                cout << endl;
-
-                if (sisa == 0 || d[0] == 0)
-                  break;
-
-                int k = d[0];
-                for (int i = 0; i < sisa - 1; i++)
-                  d[i] = d[i + 1];
-                sisa--;
-
-                if (k > sisa) {
-                  bisaDigambar = false;
-                  cout << "Tidak dapat digambar sebagai graf sederhana, karena "
-                          "derajat melebihi jumlah simpul lain"
-                       << endl;
-                  break;
-                }
-
-                for (int i = 0; i < k; i++)
-                  d[i]--;
-
-                bool adaNegatif = false;
-                for (int i = 0; i < sisa; i++)
-                  if (d[i] < 0)
-                    adaNegatif = true;
-                if (adaNegatif) {
-                  bisaDigambar = false;
-                  cout << "Tidak dapat digambar sebagai graf sederhana, karena "
-                          "derajat melebihi jumlah simpul lain"
-                       << endl;
-                  break;
-                }
-              }
-
-              if (bisaDigambar)
-                cout << "Dapat digambar sebagai graf sederhana" << endl;
-            }
+            cekParitasDanHavelHakimi();
           }
 
           cout << "\nInput tryAgain ( Y / n ): ";
