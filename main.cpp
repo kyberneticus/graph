@@ -8,36 +8,23 @@ const int MAX_VERTICES = 10;
 const string BORDER(42, '=');
 const string DIVIDER(42, '-');
 
-struct Soal {
-  int nomor;
-  const char *judul;
-  const char *teks;
-  const char *gambar;
+const char *judulSoal[] = {"Graf Teratur", "Graf Berderajat Sama",
+                           "Euler dan Hamilton", "DFS dan BFS",
+                           "Paritas dan Havel-Hakimi"};
+const char *teksSoal[] = {
+    "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
+    "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
+    "derajat setiap simpul?",
+    "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler "
+    "dan Hamiltonian?",
+    "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
+    "dengan DFS dan BFS?",
+    "Apakah barisan derajat yang dimasukkan dapat membentuk graf sederhana? "
+    "(uji paritas dan Havel-Hakimi)",
 };
-
-const Soal daftarSoal[] = {
-    {1, "Graf Teratur",
-     "Apakah graf teratur dengan n simpul dan derajat r dapat dibuat?",
-     nullptr},
-    {2, "Graf Berderajat Sama",
-     "Berapakah jumlah simpul graf berderajat sama dari jumlah sisi dan "
-     "derajat setiap simpul?",
-     nullptr},
-    {3, "Euler dan Hamilton",
-     "Apakah graf pada adjacency matrix yang dimasukkan merupakan graf Euler "
-     "dan Hamiltonian?",
-     "questions/question-3.jpeg"},
-    {4, "DFS dan BFS",
-     "Bagaimana hasil penelusuran adjacency matrix graf dari simpul awal "
-     "dengan DFS dan BFS?",
-     "questions/question-3.jpeg"},
-    {5, "Paritas dan Havel-Hakimi",
-     "Apakah barisan derajat yang dimasukkan dapat membentuk graf sederhana? "
-     "(uji paritas dan Havel-Hakimi)",
-     nullptr},
-};
-
-const int jumlahSoal = sizeof(daftarSoal) / sizeof(daftarSoal[0]);
+const char *gambarSoal[] = {nullptr, nullptr, "questions/question-3.jpeg",
+                            "questions/question-3.jpeg", nullptr};
+const int jumlahSoal = 5;
 
 void dfs(int u, int v, int adj[][MAX_VERTICES], bool visited[]) {
   visited[u] = true;
@@ -270,7 +257,7 @@ int main() {
     while (true) {
       cout << "\nJenis penyelesaian:" << endl;
       for (int i = 0; i < jumlahSoal; i++)
-        cout << "  " << i + 1 << ". " << daftarSoal[i].judul << endl;
+        cout << "  " << i + 1 << ". " << judulSoal[i] << endl;
       cout << "Input jenisSoal (1-5): ";
 
       int jenisSoal;
@@ -318,7 +305,7 @@ int main() {
     while (true) {
       cout << "\nMAIN MENU\n" << DIVIDER << endl;
       if (soalAktif > 0)
-        cout << "Soal aktif : " << soalAktif << ". " << daftarSoal[soalAktif - 1].judul
+        cout << "Soal aktif : " << soalAktif << ". " << judulSoal[soalAktif - 1]
              << endl;
       else if (!teksSoalAktif.empty())
         cout << "Soal aktif : "
@@ -349,7 +336,7 @@ int main() {
         while (true) {
           cout << "\nDAFTAR SOAL\n" << BORDER << endl;
           for (int i = 0; i < jumlahSoal; i++)
-            cout << "  " << i + 1 << ". " << daftarSoal[i].judul
+            cout << "  " << i + 1 << ". " << judulSoal[i]
                  << endl;
           cout << "\n  6. Input soal sendiri" << endl;
           cout << "  0. Kembali" << endl << DIVIDER << endl;
@@ -377,14 +364,14 @@ int main() {
             soalAktif = pilihJenisSoal();
           } else if (pilihan >= 1 && pilihan <= jumlahSoal) {
             soalAktif = pilihan;
-            teksSoalAktif = daftarSoal[pilihan - 1].teks;
+            teksSoalAktif = teksSoal[pilihan - 1];
           } else {
             cout << "Nomor soal tidak tersedia" << endl;
             continue;
           }
 
           cout << "\nSoal aktif: " << teksSoalAktif << endl;
-          tampilkanGambar(daftarSoal[soalAktif - 1].gambar);
+          tampilkanGambar(gambarSoal[soalAktif - 1]);
           break;
         }
         continue;
@@ -410,7 +397,7 @@ int main() {
       while (true) {
         cout << "\nPECAHKAN SOAL\n" << BORDER << endl;
         for (int i = 0; i < jumlahSoal; i++)
-          cout << "  " << i + 1 << ". " << daftarSoal[i].judul << endl;
+          cout << "  " << i + 1 << ". " << judulSoal[i] << endl;
         cout << "\n  0. Kembali" << endl << DIVIDER << endl;
         cout << "Input solverNumber [0-5]: ";
 
